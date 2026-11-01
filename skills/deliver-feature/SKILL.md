@@ -1,6 +1,6 @@
 ---
 name: deliver-feature
-description: Deliver a ticket end to end with specialist agents. Plan, design if structural, implement, verify with screenshots, review in parallel (code, security, design), fix, update docs, then stop for the owner to ship. Each step passes a written handoff to the next. Run only when the user asks for it.
+description: "Deliver a ticket from start to end with the agents: brief, plan, build, verification, reviews, fixes and docs. It stops before shipping. Run only when the user asks."
 argument-hint: "[ticket id]"
 disable-model-invocation: true
 ---

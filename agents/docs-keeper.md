@@ -1,6 +1,6 @@
 ---
 name: docs-keeper
-description: Keeps the living docs in step with the code. Covers AGENTS.md rules, the Decision Log, Architecture & Data Model, the Developer Runbook traps, the README, ADR follow-through and ticket comments, in the repo and the tracker. Use at the end of a task, after a decision, or to audit docs for drift.
+description: "Docs keeper. Updates the repository and tracker docs after a change, in its own worktree. Use at the end of a task."
 model: inherit
 isolation: worktree
 skills:

@@ -31,7 +31,7 @@ An engineering playbook for AI coding agents. It gives Claude Code, Codex, Curso
 | `trackers/` | How agents use the issue tracker: Linear, Jira (with Confluence), or GitHub Issues and Projects. |
 | `skills/` | 22 skills: repeatable procedures such as `start-task`, `implement`, `verify-feature`, `security-audit` and `ship-pr`. |
 | `agents/` | 8 subagents: product owner, product engineer, architect, QA verifier, code reviewer, security auditor, design reviewer and docs keeper. |
-| `hooks/` | A Claude Code session hook that points agents to the playbook and to a project's overrides. |
+| `hooks/` | Claude Code hooks: one tells agents where the playbook and the project's overrides are; one blocks AI attribution and secrets in commits and PRs. |
 | `scripts/playbook.sh` | The installer. |
 | `USAGE.md` | Worked examples. |
 
@@ -81,7 +81,8 @@ Then open the project in Claude Code and run `/bootstrap-project`. It asks what 
 | `.playbook/` | A copy of this playbook. It also works as a Claude Code plugin. | Yes |
 | `AGENTS.md` | Built from `.playbook/AGENTS.md`, then the chosen stacks and the tracker section. | Yes |
 | `CLAUDE.md` | `@AGENTS.md`, so Claude Code loads the same rules. | Yes |
-| `.claude/skills/`, `.claude/agents/` | The skills and agents for Claude Code. | Yes |
+| `.claude/settings.json` | Turns on the playbook plugin from `./.playbook` and starts agent worktrees from your current branch (`--tools plugin`, the default). | Yes |
+| `.claude/skills/`, `.claude/agents/` | Copies of the skills and agents, only with `--tools claude` (no plugin). | Yes |
 | `.cursor/rules/` | The skills as Cursor rules. | Yes |
 | `.github/copilot-instructions.md`, `.github/prompts/` | Copilot instructions and prompt files. | Yes |
 
@@ -91,10 +92,10 @@ Options:
 | -- | -- | -- |
 | `--stack a,b` | none | Stack sections to append to `AGENTS.md` (see `./scripts/playbook.sh list`). |
 | `--tracker linear\|jira\|github` | none | The tracker section to append. For another tracker, copy `trackers/github.md` and fill in the same headings. |
-| `--tools claude,agents,cursor,copilot` | all four | Which files to write. |
+| `--tools plugin\|claude,agents,cursor,copilot` | `plugin,agents,cursor,copilot` | Which files to write. Choose `plugin` (Claude Code loads the skills from `.playbook/`) or `claude` (copies in `.claude/`), never both: both would load every skill twice. |
 | `--force` | off | Replace files that exist. `.playbook/local/` is never replaced. |
 
-The installer never overwrites a file without `--force`. If the project already has an `AGENTS.md`, it writes `AGENTS.playbook.md` for you to merge; your project's rules win.
+The installer never overwrites a file without `--force`. If the project already has an `AGENTS.md`, it writes `AGENTS.playbook.md` for you to merge; your project's rules win. With the plugin, each person runs `claude plugin marketplace add ./.playbook` once per machine from the repository root, then starts a new session.
 
 Other targets:
 
@@ -191,6 +192,17 @@ Set up a project for this (`/bootstrap-project` does it):
 | `.claude/settings.json` | `"worktree": { "baseRef": "head" }` | Claude Code branches agent worktrees from the default branch unless this is set. With it, they start from the branch you're on. |
 | `.worktreeinclude` | Copy `templates/worktreeinclude` | Gitignored files a worktree needs to run the app and tests, such as `.env`. Never list secrets a worktree doesn't need. |
 | `.gitignore` | `.claude/worktrees/` | Claude Code keeps its worktrees there. |
+
+## Guardrails
+
+The plugin's hooks enforce two rules from the working agreement, so they don't depend on an agent remembering them:
+
+| Hook | Blocks | Turn off or adjust |
+| -- | -- | -- |
+| AI attribution | `Co-Authored-By: Claude…`, "Generated with Claude…" in `git commit` and `gh pr create/edit` | Create `.playbook/local/allow-ai-attribution` |
+| Secrets in commits | Staged `.env` and key files, private keys, and AWS, GitHub, Slack, Stripe, Anthropic, OpenAI and Supabase secret tokens | List allowed paths in `.playbook/local/secret-scan-allow` |
+
+A blocked command shows the file, the line and the kind of secret, never its value. The hooks cost no context tokens.
 
 ## Keeping up to date
 

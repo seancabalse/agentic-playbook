@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Independent review of a diff or PR before the owner sees it. Covers correctness, security, data safety, UX and accessibility, scope and simplicity, tests and evidence, and docs. Reports only verified, concrete findings ranked by severity. Use proactively after finishing a change and before ship-pr.
+description: "Independent code reviewer. Reviews a diff and reports only proven findings. Use for each PR or diff."
 tools: Read, Grep, Glob, Bash
 model: inherit
 ---

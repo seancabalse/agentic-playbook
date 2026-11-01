@@ -1,6 +1,6 @@
 ---
 name: docs-upkeep
-description: Bring the project's living docs up to date with the change just made. Covers AGENTS.md rules, the Decision Log, Architecture & Data Model, the Developer Runbook traps, the README and the ticket. Use at the end of every task before opening a PR, or whenever a decision, flow, table or trap appears.
+description: "Update AGENTS.md, the decision log, the architecture doc and the runbook after a change. Use at the end of each task."
 ---
 
 # Docs upkeep

@@ -1,6 +1,6 @@
 ---
 name: handoff
-description: Hand work to the next agent, session, tool or person, or pick up work someone else handed over. Write mode records goal, state, evidence, findings, decisions, the next step and still-running processes on the ticket. Resume mode reads the latest handoff, re-verifies its key claims, then continues. Use when stopping mid-task, switching sessions or tools, finishing a specialist step, or starting from another agent's work.
+description: "Write a handoff when work goes to another agent, session or person, or continue from a handoff. Use at the end of a session or a task."
 argument-hint: "[write | resume] [ticket id]"
 ---
 

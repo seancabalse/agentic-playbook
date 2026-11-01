@@ -1,6 +1,6 @@
 ---
 name: start-task
-description: Start work on a ticket or request the playbook way. Read the ticket and the rules, check the current docs, state assumptions, ask the owner product questions, and write a short plan with a check per step. Use at the beginning of any feature, bug or chore.
+description: "Start a task: read the context, state the assumptions, ask product questions and write a plan with a check for each step. Use at the start of each task."
 argument-hint: "[ticket id or short description]"
 ---
 

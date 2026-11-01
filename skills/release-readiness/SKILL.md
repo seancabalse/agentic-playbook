@@ -1,6 +1,6 @@
 ---
 name: release-readiness
-description: Decide whether a version is ready to release by working through the release checklist with evidence. Covers milestone scope, CI, offline/sync and layout QA, accessibility, security and dependency audits, performance on real hardware, migrations, backups, release notes and the rollback plan. Use before any production release.
+description: "Audit a release before production: checks, security, accessibility, performance and rollback. Use before each production release."
 argument-hint: "[version]"
 ---
 

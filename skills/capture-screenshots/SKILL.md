@@ -1,6 +1,6 @@
 ---
 name: capture-screenshots
-description: Capture screenshots of a feature across states, sizes and settings, using Playwright (or the driver the project's stack names). Look at each one, then save them under screenshots/<ticket>/ for the PR. Use when verifying UI, preparing a PR, or when a reviewer needs visual evidence.
+description: "Capture screenshots of each state, size and setting as evidence for a PR. Use for each UI change."
 argument-hint: "[ticket id] [screens or flows]"
 ---
 
