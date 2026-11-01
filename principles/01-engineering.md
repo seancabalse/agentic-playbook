@@ -44,6 +44,13 @@ How code gets written. These apply to every language and stack.
 ## 5. Code that reads like its surroundings
 
 - **Comments say why, not what**: the constraint, the bug it avoids, the decision behind it, with the ticket id. Match the file's comment density.
+- **No unnecessary comments.** Delete a comment that:
+  - restates the code (`// increment the counter`, `// return the user`);
+  - narrates the change or its history (`// added for the new flow`, `// changed from X`, `// fixed bug`): that belongs in the commit and the PR;
+  - keeps commented-out code: git has the history;
+  - is a TODO without a ticket id;
+  - only explains an unclear name or a long function: rename or split instead.
+  A comment that stays is one a reader needs and the code can't say: a reason, a constraint, a trap, a link to a decision.
 - **Names come from the domain** (`invoice`, `outbox`, `workspace`), not from the implementation (`dataManager`, `helper2`).
 - **Pure core, thin edges.** Put rules in pure functions with injected dependencies (clock, client, fetch) so they're testable without a device or network. Entry points (routes, handlers, screens) stay thin.
 - **One place for each rule.** When a rule must exist in two layers (an SQL function and app code), say so in both, change them together, and add a test that checks they agree.
@@ -64,6 +71,12 @@ Frameworks, SDKs and cloud services change every release. Before using an API:
 - Decide **permanent vs transient** from codes (SQLSTATE, HTTP status, provider error codes), never from message text.
 - Transient failures retry with backoff, in **one** layer. Permanent ones fail fast with a friendly message.
 - Every new error code the server can raise has an explicit client mapping.
+- **No unnecessary try/catch.** Catch an error only where you can handle it: retry it (in the one retry layer), turn it into a user-facing state or message, add context and re-throw (`throw new AppError(…, { cause })`), or release a resource (prefer `finally` or the language's `using`/`with`). Otherwise let it propagate to the boundary that handles errors. Specifically:
+  - **Never swallow** an error (an empty `catch`, `catch { return null }`, `.catch(() => {})`) unless losing it is the intended behaviour, and then a comment says why.
+  - **No catch-and-rethrow** that adds nothing, and **no catch-log-rethrow**: the error is logged once, where it's handled.
+  - **No blanket catch** around a whole function "to be safe"; catch the specific operation and, where the language allows, the specific error type.
+  - **No try/catch around code that can't throw**, and no defensive handling for impossible states (AGENTS.md §2).
+  - A boundary (a request handler, a job runner, a UI error boundary) has **one** catch-all that logs with context and returns a safe response.
 
 ## 8. Ask before widening scope
 
