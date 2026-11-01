@@ -13,7 +13,7 @@ An engineering playbook for AI coding agents. It gives Claude Code, Codex, Curso
 - [Choosing how to install](#choosing-how-to-install)
 - [Install for every project on this machine](#install-for-every-project-on-this-machine)
 - [Install from GitHub](#install-from-github)
-- [Install into a project](#install-into-a-project)
+- [Set up a project](#set-up-a-project)
 - [Using it with other tools](#using-it-with-other-tools)
 - [Customising](#customising)
 - [Skills and agents](#skills-and-agents)
@@ -79,10 +79,10 @@ Then open any project in Claude Code (start a new session) and run `/playbook:bo
 | Way | Best for | How it updates |
 | -- | -- | -- |
 | [Every project on this machine](#install-for-every-project-on-this-machine), from a local clone (**recommended**) | One person, many projects | `git pull` in the clone |
-| [From GitHub](#install-from-github), without a clone | Trying it, or following a branch with no local edits | `claude plugin update` |
-| [Into a project](#install-into-a-project), as a committed copy | A team repository, or Codex, Cursor and Copilot | Run the installer again |
+| [From GitHub](#install-from-github), without a clone | Trying it, a team, or following a branch with no local edits | `claude plugin update` |
+| [Set up a project](#set-up-a-project) | Every project: `AGENTS.md`, worktree settings, and files for Codex, Cursor and Copilot | Run the installer again |
 
-Use **one route per project** for Claude Code. If a project has its own `.playbook/` turned on in `.claude/settings.json` and the machine-wide plugin is also installed, Claude Code loads two plugins with the same skills. Turn one of them off.
+Claude Code always gets the playbook from the plugin, installed once per machine. A project never registers its own copy as a plugin: plugin sources belong to the machine, not the project, so a project's `.playbook/` registered as `agentic-playbook` replaces your install for **every** project. If the session-start message says the plugin is read from some project's `.playbook/`, follow [Keeping up to date](#keeping-up-to-date) to point it back.
 
 ## Install for every project on this machine
 
@@ -111,13 +111,13 @@ The repository is a Claude Code plugin and its own marketplace:
 - **A branch**: `/plugin marketplace add seancabalse/agentic-playbook#all` (or `#mobile`, `#python`, `#supabase`).
 - **Your fork**: use `<you>/agentic-playbook`.
 - **Updates**: `claude plugin update playbook@agentic-playbook`. Publishers bump `version` in `.claude-plugin/plugin.json`.
-- **For a whole team**: commit `.claude/settings.json` from `templates/claude-settings.json`. Everyone who trusts the repository is offered the plugin.
+- **For a whole team**: commit `.claude/settings.json` from `templates/claude-settings.json`. Everyone who trusts the repository is offered the plugin from GitHub. Someone who installed from a clone or a fork should decline it, or it replaces their source on their machine.
 
 Validate a change with `claude plugin validate .`, and try it without installing with `claude --plugin-dir .`.
 
-## Install into a project
+## Set up a project
 
-For a team repository, or for Codex, Cursor and GitHub Copilot, which read files in the repository rather than a Claude Code plugin. Run it from a clone:
+`/playbook:bootstrap-project` runs this for you. By hand, from a clone:
 
 ```bash
 ./scripts/playbook.sh project ~/code/my-app --stack node-service,react-web --tracker github
@@ -127,13 +127,13 @@ It writes:
 
 | File | Purpose | Commit it? |
 | -- | -- | -- |
-| `.playbook/` | A copy of this playbook. It also works as a Claude Code plugin. | Yes |
-| `AGENTS.md` | Built from `.playbook/AGENTS.md`, then the chosen stacks and the tracker section. | Yes |
+| `AGENTS.md` | Built from the playbook's `AGENTS.md`, then the chosen stacks and the tracker section. | Yes |
 | `CLAUDE.md` | `@AGENTS.md`, so Claude Code loads the same rules. | Yes |
-| `.claude/settings.json` | Turns on the playbook plugin from `./.playbook` and starts agent worktrees from your current branch (`--tools plugin`, the default). | Yes |
+| `.claude/settings.json` | Starts agent worktrees from your current branch (`--tools plugin`, the default). It never registers a plugin source. | Yes |
+| `.playbook/` | A copy of the playbook, only with `cursor`, `copilot` or `claude`: those tools read files in the repository. It is not a plugin. | Yes |
 | `.claude/skills/`, `.claude/agents/` | Copies of the skills and agents, only with `--tools claude` (no plugin). | Yes |
-| `.cursor/rules/` | The skills as Cursor rules. | Yes |
-| `.github/copilot-instructions.md`, `.github/prompts/` | Copilot instructions and prompt files. | Yes |
+| `.cursor/rules/` | The skills as Cursor rules, only with `cursor`. | Yes |
+| `.github/copilot-instructions.md`, `.github/prompts/` | Copilot instructions and prompt files, only with `copilot`. | Yes |
 
 Options:
 
@@ -141,10 +141,10 @@ Options:
 | -- | -- | -- |
 | `--stack a,b` | none | Stack sections to append to `AGENTS.md` (see `./scripts/playbook.sh list`). |
 | `--tracker linear\|jira\|github` | none | The tracker section to append. For another tracker, copy `trackers/github.md` and fill in the same headings. |
-| `--tools plugin\|claude,agents,cursor,copilot` | `plugin,agents,cursor,copilot` | Which files to write. Choose `plugin` (Claude Code loads the skills from `.playbook/`) or `claude` (copies in `.claude/`), never both: both would load every skill twice. If you use the machine-wide install, leave both out (`--tools agents,cursor,copilot`). |
+| `--tools plugin\|claude,agents,cursor,copilot` | `plugin,agents` | Which files to write. Choose `plugin` (Claude Code uses the installed plugin) or `claude` (copies in `.claude/`, for machines without the plugin), never both: both would load every skill twice. |
 | `--force` | off | Replace files that exist. `.playbook/local/` is never replaced. |
 
-The installer never overwrites a file without `--force`. If the project already has an `AGENTS.md`, it writes `AGENTS.playbook.md` for you to merge; your project's rules win. With `--tools plugin`, each person runs `claude plugin marketplace add ./.playbook` once per machine from the repository root, then starts a new session.
+The installer never overwrites a file without `--force`. If the project already has an `AGENTS.md`, it writes `AGENTS.playbook.md` for you to merge; your project's rules win. If `.claude/settings.json` registers `./.playbook` as a plugin source (an older install), it warns you to remove it.
 
 Other targets:
 
@@ -242,7 +242,8 @@ A blocked command shows the file, the line and the kind of secret, never its val
 - **A machine-wide install**: `git pull` in the clone, then start a new session.
 - **Your fork**: `git remote add upstream https://github.com/seancabalse/agentic-playbook.git`, then `git pull upstream <branch>`.
 - **A plugin installed from GitHub**: `claude plugin update playbook@agentic-playbook`.
-- **A project's committed copy**: run the installer again with `--force` and review the diff. `.playbook/local/` is kept.
+- **A project's committed copy** (Cursor, Copilot): run the installer again with `--force` and review the diff. `.playbook/local/` is kept.
+- **The plugin points at a project's `.playbook/`** (an older install registered it): remove `extraKnownMarketplaces` for `./.playbook` and its `enabledPlugins` entry from that project's `.claude/settings.json`, then run `claude plugin marketplace remove agentic-playbook`, add your clone (or `seancabalse/agentic-playbook`) again, and `claude plugin install playbook@agentic-playbook --scope user`.
 
 ## Contributing
 
