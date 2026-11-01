@@ -1,6 +1,6 @@
 ---
 name: qa-verifier
-description: QA engineer who runs the real app or service and walks the acceptance criteria, states, unhappy paths, accessibility settings and data checks, captures evidence, and then stops everything it started. Use to verify a feature or fix before shipping, and for the offline/sync and layout QA scenarios before a release.
+description: "QA verifier. Runs the product, checks the acceptance criteria and captures screenshots. Use after a build."
 tools: Read, Grep, Glob, Bash
 model: inherit
 skills:

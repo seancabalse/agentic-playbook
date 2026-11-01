@@ -4,7 +4,7 @@
 # plus the chosen stacks and tracker, and each tool's files. In those tool files and AGENTS.md,
 # ${CLAUDE_PLUGIN_ROOT} becomes the path where the playbook ends up.
 #
-#   playbook.sh project <dir> [--stack a,b] [--tracker linear|jira|github] [--tools claude,agents,cursor,copilot] [--force]
+#   playbook.sh project <dir> [--stack a,b] [--tracker linear|jira|github] [--tools plugin|claude,agents,cursor,copilot] [--force]
 #   playbook.sh user [--force]           skills + agents for every project (~/.claude)
 #   playbook.sh prompts [<out>]          plain prompts for any chat assistant (default: dist/prompts)
 #   playbook.sh list                     stacks, trackers, starter files, skills and agents
@@ -79,7 +79,7 @@ agents_md() { # agents_md PREFIX STACKS TRACKER: the AGENTS.md content
 }
 
 install_project() {
-  local dir="" stacks="" tracker="" tools="claude,agents,cursor,copilot" s a f out
+  local dir="" stacks="" tracker="" tools="plugin,agents,cursor,copilot" s a f out
   while [ $# -gt 0 ]; do
     case "$1" in
       --stack) stacks="$2"; shift 2 ;;
@@ -94,6 +94,8 @@ install_project() {
   # Check names before writing anything, so a typo leaves the project untouched.
   for s in $(echo "$stacks" | tr ',' ' '); do [ -f "$ROOT/stacks/$s.md" ] || die "unknown stack '$s' (see: playbook.sh list)"; done
   [ -z "$tracker" ] || [ -f "$ROOT/trackers/$tracker.md" ] || die "unknown tracker '$tracker' (see: playbook.sh list)"
+  # Claude Code gets the skills and agents one way only: the plugin, or copies in .claude/. Both would list every skill twice.
+  case ",$tools," in *,plugin,*) case ",$tools," in *,claude,*) die "--tools: choose plugin or claude, not both (both would load every skill twice)" ;; esac ;; esac
   echo "Installing the playbook into $dir"
 
   # The template itself, committed with the project. Paths in the generated files are relative to the
@@ -108,9 +110,34 @@ install_project() {
     elif ! grep -q '@AGENTS.md' "$dir/CLAUDE.md"; then note "CLAUDE.md exists without @AGENTS.md: add that line"; fi
   ;; esac
 
+  case ",$tools," in *,plugin,*)
+    # The project's own .playbook/ is the plugin: one source, no copies in .claude/ to drift or load twice.
+    f="$dir/.claude/settings.json"
+    if [ -e "$f" ]; then
+      note "kept   $f (exists): merge in the settings from .playbook/templates/claude-settings.json, with the source"
+      note "       { \"source\": \"directory\", \"path\": \"./.playbook\" }"
+    else
+      mkdir -p "$(dirname "$f")"
+      cat > "$f" <<'JSON'
+{
+  "extraKnownMarketplaces": {
+    "agentic-playbook": { "source": { "source": "directory", "path": "./.playbook" } }
+  },
+  "enabledPlugins": { "playbook@agentic-playbook": true },
+  "worktree": { "baseRef": "head" }
+}
+JSON
+      note "wrote  $f (the playbook plugin from ./.playbook)"
+    fi
+    for s in $(skills); do
+      [ -e "$dir/.claude/skills/$s" ] && note "WARNING $dir/.claude/skills/$s duplicates the plugin's skill: remove it"
+    done
+  ;; esac
+
   case ",$tools," in *,claude,*)
     for s in $(skills); do render "$ROOT/skills/$s/SKILL.md" "$dir/.claude/skills/$s/SKILL.md" ".playbook"; done
     for a in $(agents); do render "$ROOT/agents/$a.md" "$dir/.claude/agents/$a.md" ".playbook"; done
+    grep -qs 'playbook@agentic-playbook' "$dir/.claude/settings.json" && note "WARNING .claude/settings.json also enables the playbook plugin: disable one of the two"
   ;; esac
 
   case ",$tools," in *,cursor,*)
@@ -146,10 +173,13 @@ install_project() {
   cat <<EOF
 
 Next:
-  1. Fill "## 8. This project" in AGENTS.md (or run /bootstrap-project in Claude Code).$( [ -z "$tracker" ] && printf '\n     No --tracker given: add a "## Tracker" section (copy one from .playbook/trackers/).' )
-  2. Add screenshots/, test-results/ and .claude/worktrees/ to .gitignore. Agents work in git worktrees:
-     set "worktree": { "baseRef": "head" } in .claude/settings.json and copy .playbook/templates/worktreeinclude
-     to .worktreeinclude (the gitignored files a worktree needs, e.g. .env).
+  0. With the plugin (default): each person runs, once per machine, from the repo root:
+       claude plugin marketplace add ./.playbook
+     then starts a new Claude Code session (skills are /playbook:<name>).
+  1. Fill "## 8. This project" in AGENTS.md (or run /playbook:bootstrap-project in Claude Code).$( [ -z "$tracker" ] && printf '\n     No --tracker given: add a "## Tracker" section (copy one from .playbook/trackers/).' )
+  2. Add screenshots/, test-results/ and .claude/worktrees/ to .gitignore. Agents work in git worktrees: make sure
+     .claude/settings.json has "worktree": { "baseRef": "head" } (the plugin route writes it), and copy
+     .playbook/templates/worktreeinclude to .worktreeinclude (the gitignored files a worktree needs, e.g. .env).
   3. Commit .playbook/ with the project. Change a default in .playbook/local/<same path>; edits to the
      rest of .playbook/ are lost when it's updated with --force (local/ is never touched).
   4. Commit the tool files you want to share (.claude/, .cursor/, .github/).

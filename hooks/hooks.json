@@ -1,8 +1,26 @@
 {
-  "description": "Tells Claude which playbook files this project overrides in .playbook/local/.",
+  "description": "SessionStart: tells Claude where the playbook is and which files the project overrides. PreToolUse (Bash): blocks AI attribution in commits and PRs, and secrets in commits.",
   "hooks": {
     "SessionStart": [
-      { "hooks": [{ "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/session-start.sh" }] }
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/session-start.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/guard-commit.sh"
+          }
+        ]
+      }
     ]
   }
 }

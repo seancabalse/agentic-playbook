@@ -1,6 +1,6 @@
 ---
 name: bootstrap-project
-description: Set up a new or existing project with the playbook. Fill AGENTS.md from the core, project and stack templates; create ADR 0001 for the stack; create the living docs (Decision Log, Architecture, Runbook, PRD) in the tracker; set up the CI and secrets plan; and file owner tasks. Run only when the user asks to bootstrap or adopt the playbook in a repo.
+description: "Set up the playbook in a new or existing repository: AGENTS.md, ADR 0001, the living docs, CI and owner tasks. Run only when the user asks."
 argument-hint: "[stack overlays, e.g. nx-monorepo,react-web,node-service]"
 disable-model-invocation: true
 ---
@@ -16,7 +16,7 @@ Stacks: $ARGUMENTS
 
 ## 2. Install the playbook files
 
-1. **The template goes into the repo** as `.playbook/`, committed with the project: if it's there already, use it. Otherwise run the installer from the playbook's folder: `scripts/playbook.sh project <repo> --stack <stacks> --tracker <linear|jira|github> --tools claude,agents,cursor,copilot`. It copies the template, builds `AGENTS.md` from `.playbook/AGENTS.md` plus the stacks and the tracker section, and writes each tool's files.
+1. **The template goes into the repo** as `.playbook/`, committed with the project: if it's there already, use it. Otherwise run the installer from the playbook's folder: `scripts/playbook.sh project <repo> --stack <stacks> --tracker <linear|jira|github> --tools plugin,agents,cursor,copilot` (`plugin` turns on the playbook plugin from `.playbook/`; use `claude` instead to copy the skills into `.claude/`, never both). It copies the template, builds `AGENTS.md` from `.playbook/AGENTS.md` plus the stacks and the tracker section, and writes each tool's files.
 2. **Claude Code users can also add it as a plugin** (optional): `claude plugin marketplace add ./.playbook`, then `claude plugin install playbook@agentic-playbook`. Or point a team to the shared playbook repo with `.claude/settings.json` from `${CLAUDE_PLUGIN_ROOT}/templates/claude-settings.json`, merged into an existing file.
 
 Either way, project changes to a playbook file go in `.playbook/local/<same path>` (the `customize` skill). For a tracker with no file in `trackers/`, write the "Tracker" section by hand from the GitHub one, covering access, ids and linking, the status mapping, where the docs live, and the editing notes.

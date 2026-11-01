@@ -1,6 +1,6 @@
 ---
 name: vet-dependency
-description: Vet a package before adding or upgrading it. Covers need, known vulnerabilities for the exact version, adoption and maintenance, framework fit, native or compiled parts, licence and install scripts, then installs it the ecosystem's way and records the decision. Use whenever a new dependency is considered.
+description: "Vet a package before you add or upgrade it: advisories, release age, adoption, licence and fit. Use for each new dependency."
 argument-hint: "[package name(s), and what it's for]"
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: architecture-review
-description: Review a proposed design, a large change or the whole system against the playbook's architecture and data principles and the project's ADRs. Covers tenancy and access control, data flow, idempotency, time handling, lifecycle, coupling and performance shape. Use before building a big feature, when a PR changes structure, or as a periodic drift check.
+description: "Review a design or a change for structural fit: tenancy, access, data flow, sync and coupling. Use before a large feature or for a structural change."
 argument-hint: "[feature, PR, or 'system']"
 ---
 

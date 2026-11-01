@@ -1,6 +1,6 @@
 ---
 name: write-adr
-description: Write an Architecture Decision Record for a hard-to-reverse choice (stack, vendor, data model, auth, sync, rendering, hosting), with real options, evidence and consequences. Use when a decision like that comes up, or to supersede an earlier ADR.
+description: "Write an architecture decision record for a choice that is hard to reverse. Use when you choose a stack, a vendor, a data model or a protocol."
 argument-hint: "[the decision to make]"
 ---
 

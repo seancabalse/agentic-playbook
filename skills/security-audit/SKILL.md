@@ -1,6 +1,6 @@
 ---
 name: security-audit
-description: Security audit of a change, a feature or the whole project. Covers secrets, access control at the data layer, input validation, sessions and device storage, privacy leaks (logs, analytics, push, crash reports), files, rate limits, dependencies and configuration. Findings need concrete exploit scenarios. Use before merging auth, data, file or payment changes, and before each release.
+description: "Audit a change or the project for security and privacy, and prove each finding. Use for auth, data, file and payment changes, and before a release."
 argument-hint: "[PR, feature, or 'project']"
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: customize
-description: Change a playbook default for this project only. Copy a principle, template, stack or tracker file from the playbook into .playbook/local/ (same path), edit it there, and record why. Run only when the user asks to customise, override or adapt part of the playbook for this repo.
+description: "Change a playbook default for this project only, with a copy in .playbook/local/. Run only when the user asks."
 argument-hint: "[playbook file or topic, e.g. templates/adr.md, the PR template, the react-web stack rules] [the change]"
 disable-model-invocation: true
 ---

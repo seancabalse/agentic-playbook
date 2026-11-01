@@ -1,6 +1,6 @@
 ---
 name: design-reviewer
-description: UX, visual design and accessibility reviewer for screens, components and UI PRs. Covers tokens and the kit, the four states, copy and voice, interaction cues, motion, layout at every size, and WCAG 2.2 AA. Reviews real screenshots, not just code. Use before shipping UI changes and for accessibility audits.
+description: "Design reviewer. Reviews UX, visual quality and accessibility from screenshots. Use for UI changes."
 tools: Read, Grep, Glob, Bash
 model: inherit
 skills:

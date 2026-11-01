@@ -1,6 +1,6 @@
 ---
 name: verify-feature
-description: Verify a change in the real running app or service, not just the tests. Walk the acceptance criteria, the loading, error, offline and empty states, the largest text size and reduce motion, and the unhappy paths. Capture evidence (screenshots, counts, timings), then stop everything that was started. Use before calling any feature or fix done, and for offline/sync and layout QA runs.
+description: "Verify a feature in the running product against its acceptance criteria and states, with evidence. Use before you call a feature done."
 argument-hint: "[ticket id, or 'offline' / 'layout' for the QA scenarios]"
 ---
 
