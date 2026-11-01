@@ -1,6 +1,6 @@
 ---
 name: architect
-description: Software architect for designing features and checking structural fit. Covers tenancy, access control, data flow, offline and sync, time handling, lifecycle, coupling, migrations and performance shape, against the project's ADRs and the playbook. Use before building a large feature, when choosing between approaches, or to draft an ADR.
+description: "Architect. Designs features and drafts ADRs, and checks structure, data flow and sync. Use before a large or structural change."
 tools: Read, Grep, Glob, Bash, WebFetch, WebSearch
 model: inherit
 skills:

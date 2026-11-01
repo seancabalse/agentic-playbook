@@ -1,6 +1,6 @@
 ---
 name: a11y-audit
-description: Audit screens or the whole app for accessibility against WCAG 2.2 AA. Covers the largest text sizes, screen reader labels and order, touch targets, contrast, non-colour cues, reduce motion, keyboard and focus on the web, and i18n correctness. Produces dated findings and tickets. Use for new screens and before each release.
+description: "Audit a screen or a release for WCAG 2.2 AA accessibility. Use for each new screen and before a release."
 argument-hint: "[screens or 'app']"
 ---
 

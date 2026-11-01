@@ -1,6 +1,6 @@
 ---
 name: ship-pr
-description: Finish a task and open the PR the playbook way. Run the full check suite, update the docs, commit without AI attribution, write the PR from the template with real verification results and screenshots, and update the ticket. Run only when the user asks to ship or open the PR.
+description: "Run the checks, update the docs, commit and open the PR from the template. Run only when the user asks to ship."
 argument-hint: "[ticket id]"
 disable-model-invocation: true
 ---

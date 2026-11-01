@@ -1,6 +1,6 @@
 ---
 name: design-review
-description: Review a screen, component or UI PR against the playbook's design and UX principles. Covers tokens and kit use, the four states, copy and voice, interaction cues, motion, layout at every size, and evidence screenshots. Use before shipping any UI change.
+description: "Review a UI change for UX, visual quality and use of the design system, from screenshots. Use for each UI change."
 argument-hint: "[screen, component or PR]"
 ---
 

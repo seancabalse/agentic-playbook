@@ -1,6 +1,6 @@
 ---
 name: log-decision
-description: Record a product, technical or process decision (or an accepted risk) in the project's Decision Log with date, why and source, and add any rule it implies to AGENTS.md. Use whenever the owner answers a question or a non-trivial choice is made.
+description: "Record a decision or an accepted risk in the decision log. Use when the owner or the team makes a decision."
 argument-hint: "[the decision]"
 ---
 

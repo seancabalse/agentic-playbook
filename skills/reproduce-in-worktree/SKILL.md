@@ -1,6 +1,6 @@
 ---
 name: reproduce-in-worktree
-description: Investigate a bug, prove a review finding, or try a risky fix in an isolated git worktree before handing anything to a person. Reproduce the problem with a failing test or script, try the smallest fix, run the full checks there, then bring the result back or hand off with the evidence. Use whenever you review a change, investigate or fix a bug, or would otherwise ask a human to look before you've tried.
+description: "Reproduce a bug or a review finding in a git worktree, and try the fix there before you ask a person. Use for bugs, investigations and reviews."
 argument-hint: "[bug, finding, PR or branch to investigate]"
 ---
 

@@ -12,7 +12,7 @@ Every example shows what you type and what should happen. Commands assume a clon
 ```
 
 - Skills are `/playbook:<name>` (e.g. `/playbook:start-task ACME-42`). Agents and the session hook work by themselves.
-- Check what it adds: `claude plugin details playbook@agentic-playbook` shows 21 skills, 8 agents and 1 hook, at about 2.3k tokens per session for the skill descriptions.
+- Check what it adds: `claude plugin details playbook@agentic-playbook` shows 22 skills, 8 agents and 2 hooks, at about 1.1k tokens per session for the skill and agent descriptions.
 - Update after a new version: `claude plugin update playbook@agentic-playbook`.
 - **For a team repo**: commit `.claude/settings.json` from the playbook's `templates/claude-settings.json`. Everyone who trusts the repo is offered the plugin.
 

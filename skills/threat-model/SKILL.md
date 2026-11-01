@@ -1,6 +1,6 @@
 ---
 name: threat-model
-description: Threat-model a feature before or while building it. List assets, attackers and entry points, apply STRIDE per entry point, and turn gaps into mitigations with tests and tickets. Use for any feature touching auth, sharing, files, payments, personal data or new public endpoints.
+description: "Make a STRIDE threat model for a feature. Use for features that touch auth, sharing, files, money or personal data."
 argument-hint: "[feature or ticket id]"
 ---
 
