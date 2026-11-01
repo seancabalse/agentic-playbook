@@ -1,0 +1,10 @@
+## Stack: Django (with the Python stack)
+
+- **Settings**: one settings module that reads the environment (`django-environ` or `pydantic-settings`), with `DEBUG` off by default and `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS` and secure cookies set per environment. Run `python manage.py check --deploy` in CI for production settings.
+- **Apps and layers**: small apps by domain. Business rules live in services or model methods, not in views or serializers. Views (or DRF viewsets) are thin, and templates hold no logic beyond display.
+- **Data**: migrations are generated, reviewed and committed together. Never edit one that has merged; data migrations are separate and reversible. Index what you filter and order by. `select_related`/`prefetch_related` where lists touch relations: an N+1 in review is a bug. Use `transaction.atomic` around multi-row writes, and `select_for_update(skip_locked=True)` for job claiming.
+- **Multi-tenancy and access**: one base queryset or manager scopes every query by tenant, and permissions are checked in one layer (DRF permission classes, or a mixin). The admin isn't a customer UI: lock it down by staff role, and audit-log changes.
+- **APIs (DRF)**: serializers validate every field. Use explicit `fields` and never `__all__` on write serializers. Add pagination by default, throttling on public endpoints and a stable error shape with a `code`. Generate the schema (`drf-spectacular`) and check it in CI.
+- **Security**: keep CSRF on for session-authenticated views. Set `SECURE_*` headers and HSTS in production. Raw SQL is parameterised only. Uploads are validated by type and size, stored outside the web root, and served through signed URLs.
+- **Async and jobs**: Celery, RQ or a DB-backed queue for background work, with idempotent tasks, retries with backoff and results recorded. Async views only where the whole call chain is async.
+- **Tests**: `pytest-django`, with factories (`factory_boy`) instead of fixtures files, and the test database created from migrations. Test permissions for every role and tenant. Make `--reuse-db` the local default; CI runs on a fresh database.

@@ -28,3 +28,11 @@ Prefer the **widely used, current** option over the clever one.
 12. **Advisories you can't fix yet are decisions**: log the package, the advisory, why it doesn't affect you or what blocks the fix, and a review date. Better still, keep them in an allowlist that CI reads, so an expired review date fails the build.
 13. **Upgrade on a schedule**: framework SDKs following their upgrade guide, one major at a time, with the full suite and a check in the real app.
 14. **Remove dependencies you no longer use** in the same PR that stops using them.
+
+## Python
+
+- **Advisories**: `pip-audit` (or `uv run pip-audit`) against the resolved environment, plus OSV and GitHub Advisories, for the version you'll install.
+- **Fit**: `requires-python`, wheels for every target platform (no sdist-only C extensions that need a compiler in production), `py.typed` or stubs, and a pure-Python fallback where one exists.
+- **Install with `uv add <pkg>`** (it updates `pyproject.toml` and `uv.lock`), never `pip install` into a system or shared interpreter. Commit `uv.lock`, and review its diff.
+- **Pin exactly** (`==`) the packages whose output you depend on, as in rule 9.
+- **Audit in CI** with `uv run pip-audit`, and accepted advisories go in the allowlist with a review date (rule 12).

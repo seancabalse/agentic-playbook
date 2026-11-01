@@ -28,3 +28,13 @@ Principles: `${CLAUDE_PLUGIN_ROOT}/principles/07-dependencies-supply-chain.md`.
 4. **Install the ecosystem's way** (`nx add`, the package manager the lockfile belongs to, or the installer the stack file names). Pin an exact version for packages whose output you depend on.
 5. **Check**: the ecosystem's audit (`npm audit`, …) shows no new findings compared with before (say exactly what's pre-existing). The lockfile diff contains no surprising transitive packages.
 6. **Record**: the PR "Packages" section (name@version, adoption, advisories, native or compiled parts); a Decision Log entry for anything notable (pinning, an accepted advisory with a revisit trigger, a choice between alternatives).
+
+## Python (PyPI)
+
+Add this row to the table in step 2:
+
+| Ecosystem | Look up | Audit | Fit to check |
+| -- | -- | -- | -- |
+| PyPI | the PyPI page and JSON (`https://pypi.org/pypi/<pkg>/json`), `uv pip compile` to see the resolved tree | `pip-audit` (or `uv run pip-audit`) | `requires-python`, wheels for every target platform (no sdist-only C extensions), `py.typed` or stubs, a pure-Python fallback |
+
+Install with `uv add <pkg>`, and check with `uv run pip-audit` that there are no new findings.

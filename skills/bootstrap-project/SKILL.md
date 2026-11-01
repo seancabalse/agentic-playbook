@@ -66,3 +66,4 @@ Suggest these stacks from what the repo contains, then confirm them with the own
 - `nx.json` → `nx-monorepo`.
 - `package.json` with React for the browser (`react-dom`, Next.js, Remix or React Router, Vite with React) → `react-web`.
 - `package.json` with a Node server (Express, Fastify, NestJS, Hono) → `node-service`.
+- `pyproject.toml`, `uv.lock` or `requirements*.txt` → `python`, plus `python-fastapi` (FastAPI in the dependencies) or `python-django` (Django in the dependencies, or `manage.py`). Starter config: `${CLAUDE_PLUGIN_ROOT}/templates/python/pyproject.toml`.
