@@ -6,14 +6,20 @@ Every example shows what you type and what should happen. Commands assume a clon
 
 ## 0. Add the plugin (once per machine)
 
-```text
-/plugin marketplace add seancabalse/agentic-playbook
-/plugin install playbook@agentic-playbook
+From a local clone (recommended; `git pull` updates it):
+
+```bash
+git clone https://github.com/seancabalse/agentic-playbook.git ~/code/agentic-playbook
+cd ~/code/agentic-playbook && git checkout all
+claude plugin marketplace add "$PWD"
+claude plugin install playbook@agentic-playbook --scope user
 ```
+
+Or straight from GitHub: `/plugin marketplace add seancabalse/agentic-playbook#all`, then `/plugin install playbook@agentic-playbook`.
 
 - Skills are `/playbook:<name>` (e.g. `/playbook:start-task ACME-42`). Agents and the session hook work by themselves.
 - Check what it adds: `claude plugin details playbook@agentic-playbook` shows 22 skills, 8 agents and 2 hooks, at about 1.1k tokens per session for the skill and agent descriptions.
-- Update after a new version: `claude plugin update playbook@agentic-playbook`.
+- Update: `git pull` in the clone (or `claude plugin update playbook@agentic-playbook` for a GitHub install), then start a new session.
 - **For a team repo**: commit `.claude/settings.json` from the playbook's `templates/claude-settings.json`. Everyone who trusts the repo is offered the plugin.
 
 The examples below work the same with the plugin (`/playbook:…`) or with a copied install (`/…`).
