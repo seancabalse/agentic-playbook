@@ -88,7 +88,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 The full check suite passes; you saw the change work in the real product, with evidence; the docs are updated in the same PR; the PR follows the template and the ticket has the verification.
 
-`${CLAUDE_PLUGIN_ROOT}` is the playbook folder (`.playbook/` in a repo, or the plugin's folder). Principles: `${CLAUDE_PLUGIN_ROOT}/principles/`; templates: `${CLAUDE_PLUGIN_ROOT}/templates/`. A project's copy at `.playbook/local/<same path>` wins over the playbook file, and this file wins over both.
+`${CLAUDE_PLUGIN_ROOT}` is the playbook folder: the plugin's folder (the session-start hook prints it), or `.playbook/` in a repo that keeps a copy for Cursor or Copilot. Principles: `${CLAUDE_PLUGIN_ROOT}/principles/`; templates: `${CLAUDE_PLUGIN_ROOT}/templates/`. A project's copy at `.playbook/local/<same path>` wins over the playbook file, and this file wins over both.
 
 ## 8. This project
 

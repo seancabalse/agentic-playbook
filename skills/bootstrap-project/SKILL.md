@@ -16,10 +16,13 @@ Stacks: $ARGUMENTS
 
 ## 2. Install the playbook files
 
-1. **The template goes into the repo** as `.playbook/`, committed with the project: if it's there already, use it. Otherwise run the installer from the playbook's folder: `scripts/playbook.sh project <repo> --stack <stacks> --tracker <linear|jira|github> --tools plugin,agents,cursor,copilot` (`plugin` turns on the playbook plugin from `.playbook/`; use `claude` instead to copy the skills into `.claude/`, never both). It copies the template, builds `AGENTS.md` from `.playbook/AGENTS.md` plus the stacks and the tracker section, and writes each tool's files.
-2. **Claude Code users can also add it as a plugin** (optional): `claude plugin marketplace add ./.playbook`, then `claude plugin install playbook@agentic-playbook`. Or point a team to the shared playbook repo with `.claude/settings.json` from `${CLAUDE_PLUGIN_ROOT}/templates/claude-settings.json`, merged into an existing file.
+You're running from the installed plugin, so the project needs **no copy of the playbook** for Claude Code.
 
-Either way, project changes to a playbook file go in `.playbook/local/<same path>` (the `customize` skill). For a tracker with no file in `trackers/`, write the "Tracker" section by hand from the GitHub one, covering access, ids and linking, the status mapping, where the docs live, and the editing notes.
+1. Run the installer from the plugin: `"${CLAUDE_PLUGIN_ROOT}/scripts/playbook.sh" project <repo> --stack <stacks> --tracker <linear|jira|github>`. The default `--tools plugin,agents` builds `AGENTS.md` from the playbook plus the stacks and the tracker section, writes `CLAUDE.md`, and sets `worktree.baseRef` in `.claude/settings.json`.
+2. Add `cursor` or `copilot` to `--tools` only if the team uses those tools. They read files in the repo, so the installer then also copies the playbook into `.playbook/` (committed, and never a plugin source).
+3. **Never** register a project's `.playbook/` as a plugin (`claude plugin marketplace add ./.playbook`, or `extraKnownMarketplaces` pointing at it). Plugin sources are per machine: it would replace the machine-wide install for every project. If the repo has one from an older install, the installer warns: remove it, and the copy too unless Cursor or Copilot needs it.
+
+Project changes to a playbook file go in `.playbook/local/<same path>` (the `customize` skill). For a tracker with no file in `trackers/`, write the "Tracker" section by hand from the GitHub one, covering access, ids and linking, the status mapping, where the docs live, and the editing notes.
 
 ## 3. Fill `AGENTS.md`
 
@@ -36,7 +39,7 @@ Either way, project changes to a playbook file go in `.playbook/local/<same path
 ## 4. Decisions and docs
 
 - **ADR 0001: stack** (`write-adr`), with the options considered. More ADRs for the other hard choices already made (auth, data, hosting).
-- **Tracker docs**, from `.playbook/templates/`:
+- **Tracker docs**, from `${CLAUDE_PLUGIN_ROOT}/templates/`:
   - Decision Log (seeded with the bootstrap decisions).
   - Architecture & Data Model.
   - Developer Runbook.
