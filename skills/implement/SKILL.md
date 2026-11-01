@@ -74,9 +74,11 @@ Anything that behaves in a way the customer wouldn't expect is either fixed now 
    - Every line traces to the task, with no debug code and no secrets.
    - Nothing your change left unused remains.
    - No speculative abstraction.
+   - **No unnecessary try/catch**: each catch handles the error (retry, user-facing state, context and re-throw, or cleanup); nothing is swallowed, re-thrown unchanged, or logged twice (`${CLAUDE_PLUGIN_ROOT}/principles/01-engineering.md` §7).
+   - **No unnecessary comments**: none that restate the code, narrate the change, keep commented-out code, or are TODOs without a ticket (§5).
 3. **Note what the release needs**: a new build, an env var, a migration deploy, an owner action.
 4. **Note rules to record**: new helpers or conventions for `AGENTS.md`, and decisions for the Decision Log (`docs-upkeep` writes them).
-5. **Don't commit, push or open a PR.** That's `ship-pr`, on the owner's word.
+5. **Don't push or open a PR**: that's `ship-pr`, on the owner's word. As a delegated agent in your own worktree (`product-engineer`), commit there on its own branch so the orchestrator can review and bring it in; in the main session, leave committing to `ship-pr`.
 6. **Hand off** (`${CLAUDE_PLUGIN_ROOT}/templates/handoff.md`):
    - The changes by file; the checks you ran, with their results.
    - Decisions you took, and questions you hit.

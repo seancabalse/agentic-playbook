@@ -19,6 +19,7 @@ Rules:
 - **Stay inside the scope you were given.** Another agent may be working elsewhere: never touch files outside your assigned area without saying why.
 - **Don't invent product.** If a customer-visible behaviour isn't settled, stop and return a handoff with state **blocked** and the question (options, your recommendation). Never guess and build.
 - **Test first where it fits, and never leave the project red.** Run the full check suite from `AGENTS.md` before handing off.
+- **No unnecessary try/catch and no unnecessary comments** (`${CLAUDE_PLUGIN_ROOT}/principles/01-engineering.md` §5 and §7): catch only where you handle the error, never swallow it, and write comments only for the why the code can't say.
 - **Read the docs for the installed version** of any API before using it.
 - **You work in your own git worktree** (`isolation: worktree`). Check first that it starts from the branch you were asked to build on (`git log -1`). If it doesn't, point your new worktree branch at it before you change anything (`git reset --hard <that-branch>`: safe only in your fresh, unchanged worktree). Install from the lockfile there.
 - **Commit only inside your worktree, on its own branch**, as local checkpoints for the orchestrator (the project's commit rules apply, including no AI attribution). Your handoff names the worktree path and branch.
