@@ -32,3 +32,16 @@ Target **WCAG 2.2 AA** on every platform. Accessibility is part of "done", not a
 ## Audit
 
 Run `a11y-audit` before each release and after any new screen: screen reader pass (NVDA or JAWS on Windows, VoiceOver on macOS), 200% zoom and 400% reflow, reduce motion, contrast, targets, keyboard. Findings become tickets labelled accessibility.
+
+## Mobile (iOS and Android)
+
+- **The largest text size is the system font size**, not zoom:
+  - Android: font scale 200% (`adb shell settings put system font_scale 2.0`; reset with `1.0`).
+  - iOS: the largest accessibility size, about 310%, the harder test (`xcrun simctl ui booted content_size accessibility-extra-extra-extra-large`; reset with `large`).
+- **Cap display text, let body text scale.** Large decorative headings may cap their scale at about 1.4× (`maxFontSizeMultiplier={1.4}`); body text scales freely.
+- **Targets**: 44 × 44 pt on iOS and 48 × 48 dp on Android, with spacing between them.
+- **Screen readers**: TalkBack on Android and VoiceOver on iOS. Swipe through each screen, and check the order, labels, roles and state announcements.
+- **Reduce motion**: iOS "Reduce Motion", and Android "Remove animations" (animator duration scale off).
+- **Keyboards**: tablets and phones with a hardware keyboard follow rule 7.
+- **Intl on Hermes**: React Native's Hermes engine lacks some `Intl` APIs (`supportedValuesOf`, sometimes `PluralRules`). Polyfill or bundle the data, and test with the global deleted.
+- **Audit**: `a11y-audit` runs on both platforms with the settings above, and resets them afterwards.

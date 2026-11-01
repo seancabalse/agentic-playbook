@@ -43,3 +43,18 @@ Other platforms add their drivers in their own section of this file. Screenshots
 12. **Before a PR**: lint, typecheck, unit tests, plus database and integration tests when data, policies or functions changed. All green, run locally.
 13. **CI repeats them** on a clean machine; a red CI blocks merging.
 14. **Before a release**: the `release-readiness` audit, which covers the offline and sync scenario run, the layout QA matrix, accessibility, security and performance on real hardware.
+
+## Mobile (iOS and Android)
+
+Verification runs on an Android emulator and an iOS simulator (or real devices), as well as in tests.
+
+| Platform | Drive it | Screenshot | Repeatable flows | Watch out for |
+| -- | -- | -- | -- | -- |
+| **Android emulator** | `adb`: `am start -a android.intent.action.VIEW -d <deep link>`, `input tap/text/keyevent`, `uiautomator dump` to find elements | `adb exec-out screencap -p > file.png` | Maestro (`maestro test flow.yaml`, `takeScreenshot`; `templates/testing/maestro-screenshots.yaml`) | Settings: `settings put system font_scale 2.0`, `wm density`, animation scales; reset them after. A PIN-locked emulator boots locked. Secure windows (biometric prompts) capture as black. `adb reverse` for local ports. |
+| **iOS simulator** | `xcrun simctl openurl booted <url>`, Maestro for taps, or the desktop app's iOS simulator tool | `xcrun simctl io booted screenshot file.png` | Maestro (same flow file) | `simctl ui booted content_size accessibility-extra-extra-extra-large` and `appearance dark`; reset to `large` and `light`. A simulator build needs a simulator build profile. |
+
+- **Run it on both platforms** when the change touches platform behaviour (permissions, notifications, files, keyboard, lifecycle). Say which one you didn't run.
+- **Mobile unhappy paths**: airplane mode, the app killed from the switcher mid-write or mid-upload, background and foreground, and a settings change that rebuilds the view (font scale, display size).
+- **"Offline" on an emulator**: turning the network off may not cut a local backend reached through `adb reverse`. Pause the backend as well.
+- **Real devices** for what emulators and simulators can't show: performance, push delivery, biometrics, the camera.
+- **Clean up**: stop emulators, simulators and Metro; reset font scale, density, animations and appearance.

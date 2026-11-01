@@ -22,3 +22,13 @@ Copy `${CLAUDE_PLUGIN_ROOT}/templates/release-checklist.md` into a dated tracker
 ## Output
 
 **Ready / Not ready**, the blocking items with tickets, the non-blocking items, and what wasn't verified. Don't mark anything ready that wasn't checked.
+
+## Mobile (iOS and Android)
+
+Add these to the checklist, each with evidence or a ticket:
+- **Builds**: store builds come from the pipeline; the version and build number are bumped; the over-the-air runtime version matches the build.
+- **Testing track**: the build was tried on real devices from TestFlight and the Play Console's internal track before submission.
+- **Store**: the listing, screenshots and review notes (with a test account); App Store privacy labels and the Play Store data safety form match what the app collects; the minimum OS versions are stated.
+- **Performance**: cold start, frame rate and tap latency on a real mid-range Android phone and an iPhone, against the budgets.
+- **Rollout**: a staged or phased release, the crash-free rate watched, and a forced-update path ready.
+- **Owner tasks**: store submission, signing credentials, and push credentials (APNs, FCM).

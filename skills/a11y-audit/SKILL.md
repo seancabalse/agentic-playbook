@@ -33,3 +33,17 @@ Principles: `${CLAUDE_PLUGIN_ROOT}/principles/05-accessibility-i18n.md`. Report 
 ## Output
 
 A dated audit doc with findings per WCAG criterion: severity, screen, evidence (screenshot), fix. Each finding becomes a ticket labelled accessibility. Include "checked and fine" so the next audit can compare.
+
+## Mobile (iOS and Android)
+
+Static pass, in addition to the list above:
+- Display text caps its scale at about 1.4× (`maxFontSizeMultiplier={1.4}`); text in fixed art uses `allowFontScaling={false}` and is mirrored in a label; button rows stack at large font scales.
+- Targets are 44 pt (iOS) and 48 dp (Android), or have `hitSlop`.
+- Custom controls set `accessibilityRole`, `accessibilityLabel` and `accessibilityState`; decorative views are hidden (`accessibilityElementsHidden` on iOS, `importantForAccessibility="no-hide-descendants"` on Android).
+
+Live pass, on both platforms:
+1. The largest text size: Android `font_scale 2.0`; iOS `accessibility-extra-extra-extra-large` (about 310%, the harder test). Screenshot each screen.
+2. Screen reader: TalkBack and VoiceOver.
+3. Reduce Motion (iOS) and Remove animations (Android).
+4. A hardware keyboard on a tablet, where the app supports one.
+5. Reset every setting you changed.

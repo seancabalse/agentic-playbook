@@ -41,3 +41,18 @@ A blank or half-drawn image usually means the page hadn't finished loading, a re
 - List the files with one line each (what it shows) in your handoff.
 - `ship-pr` publishes them: `templates/testing/push-screenshots.sh <PR> <files…>` pushes to a `screenshots` branch, never the default branch.
 - Reset every setting you changed (zoom, colour scheme, reduced motion), and stop what you started.
+
+## Mobile (iOS and Android)
+
+Add this row to the matrix in step 1:
+
+| | Default | Add when it matters |
+| -- | -- | -- |
+| **Mobile** | a standard phone at normal text | the largest text size (Android `font_scale 2.0`, iOS `accessibility-extra-extra-extra-large`), the smallest phone (360 pt wide), a tablet, dark mode, reduced motion |
+
+Capture with the platform's driver (`${CLAUDE_PLUGIN_ROOT}/principles/08-testing-qa.md` → "Mobile"):
+
+- **Android emulator**: drive with `adb` (deep links via `am start -a android.intent.action.VIEW -d <url>`, taps, `uiautomator dump` to find elements), then capture with `adb exec-out screencap -p > <file>.png`. For repeatable flows, use Maestro (`templates/testing/maestro-screenshots.yaml`; `maestro test <flow>`; `takeScreenshot`).
+- **iOS simulator**: `xcrun simctl openurl booted <url>`, `xcrun simctl ui booted content_size <size>` / `appearance dark`, then `xcrun simctl io booted screenshot <file>.png`. Maestro works here too. In the Claude desktop app, the iOS simulator tool can tap and screenshot directly.
+- **A black image** usually means a secure window (a biometric prompt) or a locked device: fix the cause and recapture.
+- **Reset** font scale, appearance, density and animations, and stop the emulators, simulators and Metro you started.

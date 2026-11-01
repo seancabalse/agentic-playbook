@@ -29,3 +29,10 @@ Look at real screenshots (ask for them, or capture them via `verify-feature`): t
 ## Output
 
 Findings ranked by customer impact, each with a screenshot reference or a file:line and a suggested fix. List what's good too, so it stays that way.
+
+## Mobile (iOS and Android)
+
+- **Targets**: 44 pt on iOS and 48 dp on Android, or `hitSlop`.
+- **Layout**: wraps and stacks at the largest system font size (Android 200%, iOS about 310%); works at 360 pt wide, on a tablet, in both Android navigation modes, and around safe areas and notches. Text in fixed art uses `allowFontScaling={false}`, and its information is in a label.
+- **Platform conventions**: the back gesture and the Android back button close sheets; the keyboard never covers the focused field; haptics and native pickers where people expect them.
+- **Evidence**: screenshots from both platforms when they differ, at the largest text size and on a small phone.

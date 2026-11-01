@@ -36,3 +36,12 @@ A shared gate component (`QueryGate`) decides between them from the query state,
 
 17. **Every UI PR has screenshots**: before and after, plus 200% zoom and dark mode or reduced motion when they matter. Store them outside the default branch (for example a `screenshots` branch) and embed them in the PR.
 18. **Check it in the real app**, in the browsers and on the platforms you ship, before calling it done. Device emulation is fine for layout but says little about performance.
+
+## Mobile (iOS and Android)
+
+- **Targets** are at least 44 × 44 pt on iOS and 48 × 48 dp on Android. When the drawing is smaller, extend the hit area (`hitSlop`, padding).
+- **Text inside fixed-size art doesn't scale** with the system font size (`allowFontScaling={false}` in React Native, not `maxFontSizeMultiplier={1}`: Android still scales the line height). Its information is repeated in an accessibility label.
+- **A row with a button stacks** the button under its text at large font scales (for example `fontScale >= 1.5`). In React Native, put a button in its own `flexDirection: 'row'` view, or a column stretches it.
+- **Check the layout** on the smallest phone you support (360 pt wide), a tablet, both Android navigation modes (gestures and 3 buttons), safe areas and notches, and the largest text size on each platform (`05-accessibility-i18n.md`).
+- **Follow platform conventions**: the Android back button and the iOS back gesture close sheets, and the keyboard never covers the focused field.
+- **Simulators and emulators are fine for layout, never for performance** (`11-observability-performance.md`). UI PRs show both platforms when the change looks different on each.

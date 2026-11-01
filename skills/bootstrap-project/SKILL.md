@@ -66,3 +66,4 @@ Suggest these stacks from what the repo contains, then confirm them with the own
 - `nx.json` → `nx-monorepo`.
 - `package.json` with React for the browser (`react-dom`, Next.js, Remix or React Router, Vite with React) → `react-web`.
 - `package.json` with a Node server (Express, Fastify, NestJS, Hono) → `node-service`.
+- `app.json` or `app.config.*` with an `expo` key, or `expo` in `package.json` → `expo-react-native`.

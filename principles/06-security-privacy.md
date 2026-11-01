@@ -38,3 +38,11 @@ Assume the client is hostile, the network is public, and every log will be read 
 20. **Security review before merge** for those paths (`security-audit` skill, `security-auditor` agent), plus a full audit before each release.
 21. **Dependencies are part of your attack surface** (`07-dependencies-supply-chain.md`).
 22. **Publishing is irreversible.** Pasted code, logs or tokens on external services may be cached even if deleted. Treat "send to a third party" as a release.
+
+## Mobile (iOS and Android)
+
+- **Keys and sessions at rest** live in the platform keystore: the Keychain on iOS, the Keystore on Android (for example through `expo-secure-store`). A larger encrypted store keeps only its key there.
+- **An optional app lock** (biometrics or the device passcode) hides the app-switcher preview while it's on (iOS: a cover while the app is inactive; Android 13+: `setRecentsScreenshotEnabled(false)`). It must survive the platform rebuilding the activity.
+- **Permissions**: use the system photo picker (no storage permission) and coarse location only, and block every permission you don't use in the app config (for example `android.blockedPermissions` in Expo's `app.json`).
+- **Push payloads** carry ids and generic wording, never private content: the lock screen is public. APNs keys and FCM credentials are owner-held secrets.
+- **Deep links** are an entry point: validate every parameter. Prefer one-time codes to tappable magic links, because many mail apps don't open custom schemes.

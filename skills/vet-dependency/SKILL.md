@@ -28,3 +28,10 @@ Principles: `${CLAUDE_PLUGIN_ROOT}/principles/07-dependencies-supply-chain.md`.
 4. **Install the ecosystem's way** (`nx add`, the package manager the lockfile belongs to, or the installer the stack file names). Pin an exact version for packages whose output you depend on.
 5. **Check**: the ecosystem's audit (`npm audit`, …) shows no new findings compared with before (say exactly what's pre-existing). The lockfile diff contains no surprising transitive packages.
 6. **Record**: the PR "Packages" section (name@version, adoption, advisories, native or compiled parts); a Decision Log entry for anything notable (pinning, an accepted advisory with a revisit trigger, a choice between alternatives).
+
+## Mobile (iOS and Android)
+
+- **Expo and React Native fit**: the package supports the installed Expo SDK and React Native version (`npx expo install --check` reports mismatches) and the New Architecture. The React Native Directory shows its iOS and Android support.
+- **Native or not**: a package with native code or a config plugin needs a new development build and a new store build, and can't ship over the air. Say so in the PR's "Packages" section and under "Needs".
+- **Install with `npx expo install <pkg>`**, never plain `npm install`, so the version matches the SDK.
+- **Permissions**: check what the package adds to the iOS `Info.plist` and the Android manifest, and block what you don't use.

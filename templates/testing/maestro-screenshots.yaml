@@ -1,0 +1,17 @@
+# Playbook template: capture screens on an Android emulator or iOS simulator for the PR.
+# Run (device booted, app installed and running against the local backend):
+#   maestro test maestro-screenshots.yaml -e APP_ID=com.example.app -e TICKET=PROJ-12
+# Wait for something visible before each capture, never for a fixed time. Prefer deep links over
+# long tap sequences: they're faster and don't break when a layout moves.
+appId: ${APP_ID}
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Home"
+    timeout: 15000
+- takeScreenshot: screenshots/${TICKET}/home-default
+- openLink: "myapp://settings"
+- extendedWaitUntil:
+    visible: "Settings"
+    timeout: 10000
+- takeScreenshot: screenshots/${TICKET}/settings-default
