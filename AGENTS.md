@@ -77,6 +77,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 ## 6. Non-negotiables
 
 - **Data**: schema changes are migrations only; never edit a merged migration. New tables need a tenant id, deny-by-default access policies, grants and access tests in the same PR. Soft delete and purge. Generated types are regenerated and committed.
+- **Code**: no unnecessary try/catch (catch only where you handle the error; never swallow it, re-throw it unchanged or log it twice) and no unnecessary comments (comments say why; no restating the code, narrating the change, commented-out code or TODOs without a ticket). See `${CLAUDE_PLUGIN_ROOT}/principles/01-engineering.md` §5 and §7.
 - **Writes** are idempotent (client UUIDs, upsert-ignore-duplicates). Retries live in one layer. Errors are classified by code, never by message text.
 - **Time**: store UTC instants plus an IANA zone; calendar dates as dates. Never hand-roll zone maths.
 - **UI**: design tokens only; build from the component kit; every screen has loading, error, offline and empty states, and never shows "empty" before data arrives.
