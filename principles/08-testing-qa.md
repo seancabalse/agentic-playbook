@@ -58,3 +58,9 @@ Verification runs on an Android emulator and an iOS simulator (or real devices),
 - **"Offline" on an emulator**: turning the network off may not cut a local backend reached through `adb reverse`. Pause the backend as well.
 - **Real devices** for what emulators and simulators can't show: performance, push delivery, biometrics, the camera.
 - **Clean up**: stop emulators, simulators and Metro; reset font scale, density, animations and appearance.
+## Supabase
+
+- **Database rules** are pgTAP tests in `supabase/tests/`, run with `supabase test db` (pinned CLI). Every table has can and can't tests for each role, through RLS.
+- **Integration tests** run against `supabase start` (Postgres, Auth, Storage, Realtime and Edge Functions locally) with real users that the admin client creates. Read the local service key with `supabase status -o env`, never echoed. Local email lands in Mailpit, where tests read sign-in codes.
+- **Realtime**: a test checks that every table a channel subscribes to is in the publication, and that secret columns aren't published.
+- **CI** starts only what the tests need (`supabase start -x studio,imgproxy`, for example), and runs `supabase test db` and the integration tests on every PR that touches data.

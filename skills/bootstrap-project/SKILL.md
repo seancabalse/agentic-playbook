@@ -68,3 +68,12 @@ Suggest these stacks from what the repo contains, then confirm them with the own
 - `package.json` with a Node server (Express, Fastify, NestJS, Hono) → `node-service`.
 - `app.json` or `app.config.*` with an `expo` key, or `expo` in `package.json` → `expo-react-native`.
 - `pyproject.toml`, `uv.lock` or `requirements*.txt` → `python`, plus `python-fastapi` (FastAPI in the dependencies) or `python-django` (Django in the dependencies, or `manage.py`). Starter config: `${CLAUDE_PLUGIN_ROOT}/templates/python/pyproject.toml`.
+- `supabase/config.toml`, or `@supabase/supabase-js` in `package.json` → `supabase-postgres`.
+
+## Supabase
+
+When the project uses `supabase-postgres`, step 5 (safety rails) also covers:
+- The CLI version pinned in `package.json` scripts and in CI.
+- CI runs `supabase test db` (pgTAP) and the integration tests against `supabase start`, and fails on stale generated types.
+- A deploy workflow applies migrations and Edge Functions: dev on merge, prod by manual run. The owner sets the access token and database passwords as CI secrets; never handle the values.
+- Hosted Auth settings the CLI doesn't deploy (custom SMTP, email templates, code expiry) are owner tasks with steps.
