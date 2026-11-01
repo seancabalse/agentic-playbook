@@ -43,3 +43,10 @@ Other platforms add their drivers in their own section of this file. Screenshots
 12. **Before a PR**: lint, typecheck, unit tests, plus database and integration tests when data, policies or functions changed. All green, run locally.
 13. **CI repeats them** on a clean machine; a red CI blocks merging.
 14. **Before a release**: the `release-readiness` audit, which covers the offline and sync scenario run, the layout QA matrix, accessibility, security and performance on real hardware.
+
+## Supabase
+
+- **Database rules** are pgTAP tests in `supabase/tests/`, run with `supabase test db` (pinned CLI). Every table has can and can't tests for each role, through RLS.
+- **Integration tests** run against `supabase start` (Postgres, Auth, Storage, Realtime and Edge Functions locally) with real users that the admin client creates. Read the local service key with `supabase status -o env`, never echoed. Local email lands in Mailpit, where tests read sign-in codes.
+- **Realtime**: a test checks that every table a channel subscribes to is in the publication, and that secret columns aren't published.
+- **CI** starts only what the tests need (`supabase start -x studio,imgproxy`, for example), and runs `supabase test db` and the integration tests on every PR that touches data.

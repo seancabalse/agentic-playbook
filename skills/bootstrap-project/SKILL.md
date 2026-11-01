@@ -66,3 +66,12 @@ Suggest these stacks from what the repo contains, then confirm them with the own
 - `nx.json` → `nx-monorepo`.
 - `package.json` with React for the browser (`react-dom`, Next.js, Remix or React Router, Vite with React) → `react-web`.
 - `package.json` with a Node server (Express, Fastify, NestJS, Hono) → `node-service`.
+- `supabase/config.toml`, or `@supabase/supabase-js` in `package.json` → `supabase-postgres`.
+
+## Supabase
+
+When the project uses `supabase-postgres`, step 5 (safety rails) also covers:
+- The CLI version pinned in `package.json` scripts and in CI.
+- CI runs `supabase test db` (pgTAP) and the integration tests against `supabase start`, and fails on stale generated types.
+- A deploy workflow applies migrations and Edge Functions: dev on merge, prod by manual run. The owner sets the access token and database passwords as CI secrets; never handle the values.
+- Hosted Auth settings the CLI doesn't deploy (custom SMTP, email templates, code expiry) are owner tasks with steps.
