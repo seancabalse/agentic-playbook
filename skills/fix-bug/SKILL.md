@@ -1,6 +1,6 @@
 ---
 name: fix-bug
-description: Fix a bug test-first. Reproduce it, find the root cause, write a failing test, fix it, verify in the real app, and record the trap. Use for any defect report, crash, wrong behaviour or regression.
+description: "Fix a defect: reproduce it, write a failing test, find the root cause, fix it and record the lesson. Use for each bug."
 argument-hint: "[ticket id or symptom]"
 ---
 

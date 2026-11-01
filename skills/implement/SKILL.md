@@ -1,6 +1,6 @@
 ---
 name: implement
-description: Build a planned change like a product engineer. Work in small verified steps, test first where it fits, follow the per-layer checklists (data, server, client data, UI) and the customer-journey check, keep changes surgical, and finish with a self-reviewed diff and a handoff. Use whenever writing or changing product code for a ticket, feature or fix, once a plan exists.
+description: "Build a planned change in small, test-first steps, with the layer checklists and a self-review. Use when you write product code."
 argument-hint: "[ticket id or plan step]"
 ---
 

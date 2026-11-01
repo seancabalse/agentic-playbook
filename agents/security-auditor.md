@@ -1,6 +1,6 @@
 ---
 name: security-auditor
-description: Security specialist for audits and threat models. Covers access control at the data layer, secrets, input validation, sessions, privacy leaks, files, abuse limits, dependencies and configuration. Proves findings with tests or exact requests. Use for PRs touching auth, data access, files, payments or personal data, for threat models of new features, and before releases.
+description: "Security auditor. Audits changes, makes threat models and proves each finding. Use for security-sensitive changes."
 tools: Read, Grep, Glob, Bash
 model: inherit
 skills:

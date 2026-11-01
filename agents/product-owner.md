@@ -1,6 +1,6 @@
 ---
 name: product-owner
-description: Product owner, project owner and project manager. Makes sense of a request, brings domain knowledge, finds the gaps in goal, users, scope, requirements and acceptance criteria, and returns a draft requirements brief with ranked questions for the owner, all in ASD-STE100 (Simplified Technical English). Use before planning a vague, large or new request, or to turn the owner's answers into an agreed brief.
+description: "Product owner and project manager. Clarifies requirements and scope, and returns questions and a brief in ASD-STE100. Use for vague or new requests."
 tools: Read, Grep, Glob, WebFetch, WebSearch
 model: inherit
 skills:

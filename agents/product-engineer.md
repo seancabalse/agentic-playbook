@@ -1,6 +1,6 @@
 ---
 name: product-engineer
-description: Product engineer who writes the code. Builds a planned ticket or one slice of it end to end (data, server, client and UI), test first, following the project's AGENTS.md and the implement checklists, and thinks through the customer journey (states, offline, other users, lifecycle). Returns a handoff with the changes and the checks it ran. Use when the build step of a planned ticket is delegated, or to apply confirmed review findings.
+description: "Product engineer and the only code writer. Builds a planned ticket test-first, in its own worktree. Use to build a plan or to apply review fixes."
 tools: Read, Edit, Write, Grep, Glob, Bash
 model: inherit
 isolation: worktree

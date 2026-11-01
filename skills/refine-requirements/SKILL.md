@@ -1,6 +1,6 @@
 ---
 name: refine-requirements
-description: Act as the product owner, project owner and project manager for a request. Make sense of the instructions, bring the domain knowledge, find the gaps, and ask the owner questions round by round until the goal, users, scope, requirements and acceptance criteria are clear. Write the result as a requirements brief in ASD-STE100 (Simplified Technical English). Use when a request, ticket or idea is vague, large or new, before planning or building it.
+description: "Clarify a vague request with the owner, round by round, and write a requirements brief in ASD-STE100. Use before you plan a new or unclear request."
 argument-hint: "[the request, ticket id or idea]"
 ---
 
