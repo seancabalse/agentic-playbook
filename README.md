@@ -10,12 +10,15 @@ An engineering playbook for AI coding agents. It gives Claude Code, Codex, Curso
 - [Branches](#branches)
 - [Requirements](#requirements)
 - [Quick start](#quick-start)
-- [Installing into a project](#installing-into-a-project)
-- [Using it as a Claude Code plugin](#using-it-as-a-claude-code-plugin)
+- [Choosing how to install](#choosing-how-to-install)
+- [Install for every project on this machine](#install-for-every-project-on-this-machine)
+- [Install from GitHub](#install-from-github)
+- [Install into a project](#install-into-a-project)
 - [Using it with other tools](#using-it-with-other-tools)
 - [Customising](#customising)
 - [Skills and agents](#skills-and-agents)
 - [Worktrees and human review](#worktrees-and-human-review)
+- [Guardrails](#guardrails)
 - [Keeping up to date](#keeping-up-to-date)
 - [Contributing](#contributing)
 - [License](#license)
@@ -45,8 +48,9 @@ An engineering playbook for AI coding agents. It gives Claude Code, Codex, Curso
 | `mobile` | iOS and Android apps with Expo / React Native | `main`'s, plus `expo-react-native` |
 | `python` | Python services and tools | `main`'s, plus `python`, `python-fastapi`, `python-django` |
 | `supabase` | Supabase / Postgres backends | `main`'s, plus `supabase-postgres` |
+| `all` | One install for every kind of project | all of the above |
 
-Each branch has a `BRANCH.md` with its extra prerequisites. To combine branches (for example, a React Native app with a Supabase backend), merge one into the other in your fork: `git checkout mobile && git merge supabase`. Branches add sections at the end of shared files, so a conflict means keeping both sections.
+Each branch has a `BRANCH.md` with its extra prerequisites. `all` merges every branch, so one machine-wide install serves projects on different stacks; its additions are in clearly labelled sections ("Mobile (iOS and Android)", "Python", "Supabase"). To combine only some branches in your fork, merge one into another (`git checkout mobile && git merge supabase`); branches add sections at the end of shared files, so a conflict means keeping both sections.
 
 ## Requirements
 
@@ -58,23 +62,68 @@ Each branch has a `BRANCH.md` with its extra prerequisites. To combine branches 
 ## Quick start
 
 ```bash
-# 1. Get the playbook (or fork it first to keep your own changes).
+# 1. Clone the playbook (or your fork) and pick a branch.
 git clone https://github.com/seancabalse/agentic-playbook.git
 cd agentic-playbook
-git checkout main            # or: mobile, python, supabase
+git checkout all             # or: main, mobile, python, supabase
 
-# 2. See what's available on this branch.
-./scripts/playbook.sh list
+# 2. Install it for every project on this machine.
+claude plugin marketplace add "$PWD"
+claude plugin install playbook@agentic-playbook --scope user
+```
 
-# 3. Install it into a project.
+Then open any project in Claude Code (start a new session) and run `/playbook:bootstrap-project`. It asks what it can't infer, writes or completes the project's `AGENTS.md` (with section 8 filled in and each command verified), writes ADR 0001 for the stack, sets up worktrees, and creates the living docs in your tracker.
+
+## Choosing how to install
+
+| Way | Best for | How it updates |
+| -- | -- | -- |
+| [Every project on this machine](#install-for-every-project-on-this-machine), from a local clone (**recommended**) | One person, many projects | `git pull` in the clone |
+| [From GitHub](#install-from-github), without a clone | Trying it, or following a branch with no local edits | `claude plugin update` |
+| [Into a project](#install-into-a-project), as a committed copy | A team repository, or Codex, Cursor and Copilot | Run the installer again |
+
+Use **one route per project** for Claude Code. If a project has its own `.playbook/` turned on in `.claude/settings.json` and the machine-wide plugin is also installed, Claude Code loads two plugins with the same skills. Turn one of them off.
+
+## Install for every project on this machine
+
+```bash
+git clone https://github.com/seancabalse/agentic-playbook.git ~/code/agentic-playbook
+cd ~/code/agentic-playbook
+git checkout all
+claude plugin marketplace add "$PWD"
+claude plugin install playbook@agentic-playbook --scope user
+```
+
+- Claude Code reads the plugin directly from the clone. Skills appear as `/playbook:<name>` in every project, and the agents and hooks load automatically.
+- To update, run `git pull` in the clone and start a new session.
+- Your own changes for all your projects go in your fork. Changes for one project go in that project's `.playbook/local/` (see [Customising](#customising)).
+- In each project, run `/playbook:bootstrap-project` once. The project needs no copy of the playbook.
+
+## Install from GitHub
+
+The repository is a Claude Code plugin and its own marketplace:
+
+```text
+/plugin marketplace add seancabalse/agentic-playbook
+/plugin install playbook@agentic-playbook
+```
+
+- **A branch**: `/plugin marketplace add seancabalse/agentic-playbook#all` (or `#mobile`, `#python`, `#supabase`).
+- **Your fork**: use `<you>/agentic-playbook`.
+- **Updates**: `claude plugin update playbook@agentic-playbook`. Publishers bump `version` in `.claude-plugin/plugin.json`.
+- **For a whole team**: commit `.claude/settings.json` from `templates/claude-settings.json`. Everyone who trusts the repository is offered the plugin.
+
+Validate a change with `claude plugin validate .`, and try it without installing with `claude --plugin-dir .`.
+
+## Install into a project
+
+For a team repository, or for Codex, Cursor and GitHub Copilot, which read files in the repository rather than a Claude Code plugin. Run it from a clone:
+
+```bash
 ./scripts/playbook.sh project ~/code/my-app --stack node-service,react-web --tracker github
 ```
 
-Then open the project in Claude Code and run `/bootstrap-project`. It asks what it can't infer, fills section 8 of `AGENTS.md`, verifies each command it records, writes ADR 0001 for the stack, and creates the living docs in your tracker.
-
-## Installing into a project
-
-`scripts/playbook.sh project <dir>` writes:
+It writes:
 
 | File | Purpose | Commit it? |
 | -- | -- | -- |
@@ -92,33 +141,17 @@ Options:
 | -- | -- | -- |
 | `--stack a,b` | none | Stack sections to append to `AGENTS.md` (see `./scripts/playbook.sh list`). |
 | `--tracker linear\|jira\|github` | none | The tracker section to append. For another tracker, copy `trackers/github.md` and fill in the same headings. |
-| `--tools plugin\|claude,agents,cursor,copilot` | `plugin,agents,cursor,copilot` | Which files to write. Choose `plugin` (Claude Code loads the skills from `.playbook/`) or `claude` (copies in `.claude/`), never both: both would load every skill twice. |
+| `--tools plugin\|claude,agents,cursor,copilot` | `plugin,agents,cursor,copilot` | Which files to write. Choose `plugin` (Claude Code loads the skills from `.playbook/`) or `claude` (copies in `.claude/`), never both: both would load every skill twice. If you use the machine-wide install, leave both out (`--tools agents,cursor,copilot`). |
 | `--force` | off | Replace files that exist. `.playbook/local/` is never replaced. |
 
-The installer never overwrites a file without `--force`. If the project already has an `AGENTS.md`, it writes `AGENTS.playbook.md` for you to merge; your project's rules win. With the plugin, each person runs `claude plugin marketplace add ./.playbook` once per machine from the repository root, then starts a new session.
+The installer never overwrites a file without `--force`. If the project already has an `AGENTS.md`, it writes `AGENTS.playbook.md` for you to merge; your project's rules win. With `--tools plugin`, each person runs `claude plugin marketplace add ./.playbook` once per machine from the repository root, then starts a new session.
 
 Other targets:
 
 ```bash
-./scripts/playbook.sh user       # skills and agents for every project on this machine (~/.claude)
+./scripts/playbook.sh user       # copies of the skills and agents in ~/.claude, without the plugin
 ./scripts/playbook.sh prompts    # plain prompt files for any chat assistant (dist/prompts/)
 ```
-
-## Using it as a Claude Code plugin
-
-The repository is a Claude Code plugin and its own marketplace. Skills appear as `/playbook:<name>`; agents and the session hook load automatically.
-
-```text
-/plugin marketplace add seancabalse/agentic-playbook
-/plugin install playbook@agentic-playbook
-```
-
-- **A branch**: `/plugin marketplace add seancabalse/agentic-playbook#python` (or `#mobile`, `#supabase`).
-- **Your fork**: use `<you>/agentic-playbook`.
-- **A project's committed copy**: from the project root, run `claude plugin marketplace add ./.playbook` once per machine, and commit `.claude/settings.json` with the plugin enabled (see `templates/claude-settings.json`).
-- **Updates**: `claude plugin update playbook@agentic-playbook`. Publishers bump `version` in `.claude-plugin/plugin.json`.
-
-Validate a change with `claude plugin validate .`, and try it without installing with `claude --plugin-dir .`.
 
 ## Using it with other tools
 
@@ -206,9 +239,10 @@ A blocked command shows the file, the line and the kind of secret, never its val
 
 ## Keeping up to date
 
-- **Your fork**: `git remote add upstream https://github.com/seancabalse/agentic-playbook.git`, then `git pull upstream main` (or the branch you use).
-- **A project**: run the installer again with `--force` and review the diff. `.playbook/local/` is kept.
-- **The plugin**: `claude plugin update playbook@agentic-playbook`.
+- **A machine-wide install**: `git pull` in the clone, then start a new session.
+- **Your fork**: `git remote add upstream https://github.com/seancabalse/agentic-playbook.git`, then `git pull upstream <branch>`.
+- **A plugin installed from GitHub**: `claude plugin update playbook@agentic-playbook`.
+- **A project's committed copy**: run the installer again with `--force` and review the diff. `.playbook/local/` is kept.
 
 ## Contributing
 
