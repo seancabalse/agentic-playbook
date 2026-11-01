@@ -1,6 +1,6 @@
 # Using the playbook: worked examples
 
-Every example shows what you type and what should happen. Commands assume a clone of the playbook at `~/code/agentic-playbook`. Inside a project, the same files are in `.playbook/`.
+Every example shows what you type and what should happen. Commands assume a clone of the playbook at `~/code/agentic-playbook`. A project that keeps a copy for Cursor or Copilot has the same files in `.playbook/`.
 
 ---
 
@@ -34,12 +34,12 @@ cd acme
 ~/code/agentic-playbook/scripts/playbook.sh project . --stack nx-monorepo,react-web,node-service --tracker jira
 ```
 
-You get `AGENTS.md` (core rules, an empty project section, three stack add-ons, the Jira tracker section), `CLAUDE.md` (`@AGENTS.md`), `.claude/skills` and `.claude/agents`, Cursor rules, Copilot instructions and prompts, and `.playbook/` (principles and templates).
+You get `AGENTS.md` (core rules, an empty project section, three stack add-ons, the Jira tracker section), `CLAUDE.md` (`@AGENTS.md`) and `.claude/settings.json` (worktrees start from your branch). Claude Code reads the skills, agents, principles and templates from the plugin. Add `--tools plugin,agents,cursor,copilot` if the team also uses Cursor or Copilot: then you also get their files and a `.playbook/` copy for them.
 
 Then, in Claude Code:
 
 ```
-/bootstrap-project nx-monorepo,react-web,node-service
+/playbook:bootstrap-project nx-monorepo,react-web,node-service
 ```
 
 What it should do:
@@ -63,7 +63,7 @@ What it should do:
 Merge AGENTS.playbook.md into AGENTS.md. Keep every existing project rule; add the playbook core sections that are missing; list any conflicts for me instead of choosing. Then delete AGENTS.playbook.md.
 ```
 
-Decide whether `.playbook/` is shared (commit it) or personal (add it to `.git/info/exclude`).
+If you added Cursor or Copilot, decide whether `.playbook/` is shared (commit it) or personal (add it to `.git/info/exclude`). Never register it as a Claude Code plugin: that would replace the plugin for every project on your machine.
 
 ---
 
