@@ -35,3 +35,12 @@ Principles: `${CLAUDE_PLUGIN_ROOT}/principles/07-dependencies-supply-chain.md`.
 - **Native or not**: a package with native code or a config plugin needs a new development build and a new store build, and can't ship over the air. Say so in the PR's "Packages" section and under "Needs".
 - **Install with `npx expo install <pkg>`**, never plain `npm install`, so the version matches the SDK.
 - **Permissions**: check what the package adds to the iOS `Info.plist` and the Android manifest, and block what you don't use.
+## Python (PyPI)
+
+Add this row to the table in step 2:
+
+| Ecosystem | Look up | Audit | Fit to check |
+| -- | -- | -- | -- |
+| PyPI | the PyPI page and JSON (`https://pypi.org/pypi/<pkg>/json`), `uv pip compile` to see the resolved tree | `pip-audit` (or `uv run pip-audit`) | `requires-python`, wheels for every target platform (no sdist-only C extensions), `py.typed` or stubs, a pure-Python fallback |
+
+Install with `uv add <pkg>`, and check with `uv run pip-audit` that there are no new findings.

@@ -1,0 +1,11 @@
+## Stack: FastAPI service (with the Python stack)
+
+- **Layers**: routers are thin (parse, call, map). Services hold the rules, with dependencies injected through `Depends` or constructor arguments. Repositories are the only code that talks to the database. Each external service gets one client module.
+- **Models**: request and response bodies are pydantic models, separate from ORM models. Set `response_model` (or a return annotation) on every route, so internal fields never leak. The OpenAPI schema is generated and checked in CI; clients are generated from it, not hand-written.
+- **Auth**: a single dependency resolves the caller from the session or token and is required by default (a router-level dependency). Public routes opt out explicitly. Derive the tenant from the caller, never from a path or body id.
+- **Async**: `async def` routes use async drivers (`asyncpg`, `httpx.AsyncClient`, async SQLAlchemy). Blocking work goes in `def` routes, which FastAPI runs in a thread pool, or in `asyncio.to_thread`. Create the clients once, in the `lifespan` handler, and close them there.
+- **Idempotency**: creates accept a client-generated id or an `Idempotency-Key` and use upsert-ignore-duplicates. Webhooks verify the signature and deduplicate by event id.
+- **Errors**: domain exceptions carry a `code`, and one exception handler maps them to a status and a stable JSON shape (`{"code", "message"}`). Validation errors keep FastAPI's 422 shape. No stack traces in responses.
+- **Operability**: `/healthz` (liveness) and `/readyz` (dependencies). Run under `uvicorn`/`gunicorn` with workers sized to the CPU. Graceful shutdown happens through `lifespan`. Set timeouts on every outbound call, rate limits on public routes, CORS as an explicit allow-list, and body size limits.
+- **Background work**: `BackgroundTasks` only for fire-and-forget work that can be lost. Anything that must happen goes through a queue or a DB-backed job table, with claim/skip-locked, retries with backoff and a recorded outcome.
+- **Tests**: `httpx.AsyncClient` with `ASGITransport` against the app, swapping only dependencies through `app.dependency_overrides`, with a real database in a container. Every route has an auth test (no caller, the wrong tenant) as well as the happy path.
