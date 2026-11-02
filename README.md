@@ -153,6 +153,23 @@ Other targets:
 ./scripts/playbook.sh prompts    # plain prompt files for any chat assistant (dist/prompts/)
 ```
 
+### When to run `/playbook:bootstrap-project`
+
+The machine-wide install and the project setup do different jobs, and you need both:
+
+- **The plugin** (machine-wide, [Choosing how to install](#choosing-how-to-install)) gives Claude Code the skills, agents, hooks, principles and templates. Install it once per machine. Without it, `/playbook:bootstrap-project` doesn't exist.
+- **The project setup** (`/playbook:bootstrap-project`, or `playbook.sh project` by hand) writes the files that one repository commits. Run it once per repository.
+
+| Situation | What to do |
+| -- | -- |
+| A new project | Create the scaffold first (`create-nx-workspace`, `create-expo-app`, `uv init`, …), then run the skill. It infers the stacks from the manifests and runs each command it lists in `AGENTS.md`. In an empty folder, give it the brief or PRD; it can't verify commands until they exist. |
+| An existing repository without an `AGENTS.md` | Run the skill once. |
+| An existing repository with an `AGENTS.md` | Run the skill once. The installer writes `AGENTS.playbook.md` beside yours and the skill merges it: your project's rules win, and it lists the conflicts for you. |
+| A repository from an older install that registers `./.playbook` as a plugin | Remove that registration first ([Keeping up to date](#keeping-up-to-date)), then run the skill. |
+| A repository that is already set up | Don't run it again. To take new `AGENTS.md` rules after a playbook update, run `playbook.sh project <repo>` without `--force` and merge `AGENTS.playbook.md`. `--force` replaces `AGENTS.md`, section 8 included. |
+| A teammate's clone of a set-up repository | Don't run it. The teammate installs the plugin on their machine; the committed `AGENTS.md`, `CLAUDE.md` and `.claude/settings.json` do the rest. |
+| A machine that can't install the plugin | Run `playbook.sh project <repo> --tools claude,agents` from a clone. It copies the skills and agents into the repository, so the skill is then `/bootstrap-project`, without the `playbook:` prefix. Don't also install the plugin: every skill would load twice. |
+
 ## Using it with other tools
 
 | Tool | Always-on rules | Procedures |
