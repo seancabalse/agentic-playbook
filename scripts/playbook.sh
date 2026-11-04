@@ -5,6 +5,7 @@
 # also get a copy as .playbook/; then ${CLAUDE_PLUGIN_ROOT} becomes .playbook in the files written.
 #
 #   playbook.sh project <dir> [--stack a,b] [--tracker linear|jira|github] [--tools plugin|claude,agents,cursor,copilot] [--force]
+#   playbook.sh workspace [<dir>] [--force]  a workspace of several repositories: asks which folders belong to it
 #   playbook.sh user [--force]           skills + agents for every project (~/.claude)
 #   playbook.sh prompts [<out>]          plain prompts for any chat assistant (default: dist/prompts)
 #   playbook.sh list                     stacks, trackers, starter files, skills and agents
@@ -165,6 +166,8 @@ install_project() {
     done
   ;; esac
 
+  # The workspace setup prints its own next steps for all its repositories.
+  [ "${PLAYBOOK_NO_NEXT:-0}" = 1 ] && return
   cat <<EOF
 
 Next:
@@ -176,6 +179,167 @@ Next:
      playbook's templates/worktreeinclude to .worktreeinclude (the gitignored files a worktree needs, e.g. .env).
   3. Change a playbook default for this project in .playbook/local/<same path>, and commit it.$( [ "$prefix" = ".playbook" ] && printf '\n     Commit .playbook/ too. Edits outside local/ are lost when it is updated with --force.' )
   4. Commit the tool files you want to share (.claude/, .cursor/, .github/).
+EOF
+}
+
+# ask VAR QUESTION DEFAULT: read one answer from stdin (so answers can be piped in); Enter keeps the default.
+ask() {
+  local reply=""
+  printf '%s [%s]: ' "$2" "$3" >&2
+  IFS= read -r reply || true
+  printf -v "$1" '%s' "${reply:-$3}"
+}
+is_yes() { case "$1" in [Yy]*) return 0 ;; *) return 1 ;; esac; }
+
+guess_role() {
+  case "$(echo "$1" | tr 'A-Z' 'a-z')" in
+    *front*|*web*|*client*|*ui|fe|fe-*|*-fe) echo frontend ;;
+    *back*|*api*|*server*|*service*|be|be-*|*-be) echo backend ;;
+    *) echo other ;;
+  esac
+}
+
+# The stacks a repository's manifests suggest, limited to the stacks this branch has ("none" if no match).
+infer_stacks() {
+  local d="$1" found="" s out=""
+  if [ -f "$d/nx.json" ]; then found="$found nx-monorepo"; fi
+  if [ -f "$d/package.json" ]; then
+    if grep -qE '"(react-dom|next|@remix-run/react|react-router)"' "$d/package.json"; then found="$found react-web"; fi
+    if grep -qE '"(express|fastify|@nestjs/core|hono)"' "$d/package.json"; then found="$found node-service"; fi
+  fi
+  for s in $found; do if [ -f "$ROOT/stacks/$s.md" ]; then out="$out,$s"; fi; done
+  out="${out#,}"; echo "${out:-none}"
+}
+
+# A workspace: this folder is a coordination repository (the lead session runs here) that holds the
+# project's repositories as separate clones. Asks which folders belong to the project, then writes the
+# workspace's AGENTS.md, CLAUDE.md, records and .gitignore, and sets up member repositories without an AGENTS.md.
+install_workspace() {
+  local ws="" a d name role n i s stacks tracker f line
+  local members="" sessions="" refs="" ignores="" setup=""
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --force) FORCE=1; shift ;;
+      *) [ -z "$ws" ] || die "unexpected argument '$1'"; ws="$1"; shift ;;
+    esac
+  done
+  ws="${ws:-.}"
+  [ -d "$ws" ] || die "usage: playbook.sh workspace [<existing dir>] [--force]"
+  ws="$(cd "$ws" && pwd)"
+  echo "Setting up a workspace in $ws. Press Enter to keep the answer in [brackets]."
+
+  ask a "Is $ws the workspace (main) repository, where the lead session runs? (y/n)" y
+  is_yes "$a" || die "stopped: run it in the workspace folder, or pass its path"
+  if [ ! -e "$ws/.git" ]; then
+    ask a "It isn't a git repository yet. Run git init? (y/n)" y
+    if is_yes "$a"; then git -C "$ws" init -q; note "wrote  $ws/.git (git init)"; fi
+  fi
+  ask tracker "Tracker (linear, jira, github or none)?" none
+  if [ "$tracker" = none ]; then tracker=""; fi
+  [ -z "$tracker" ] || [ -f "$ROOT/trackers/$tracker.md" ] || die "unknown tracker '$tracker' (see: playbook.sh list)"
+
+  sessions="| \`lead\` | this folder | \`claude -n lead\` |"
+  for d in "$ws"/*/; do
+    [ -d "$d" ] || continue
+    name="$(basename "$d")"
+    # The workspace's own records.
+    if [ "$name" = docs ] && [ -d "$d/workspace" ]; then continue; fi
+    if [ -e "$d/.git" ]; then
+      ask a "Is $name/ (a git repository) part of the project? (y/n)" y
+      is_yes "$a" || continue
+      ask role "  Its role (frontend, backend or other)?" "$(guess_role "$name")"
+      ask n "  How many agent sessions will work in it?" 1
+      case "$n" in [1-9]) ;; *) die "sessions for $name/: give a number from 1 to 9" ;; esac
+      ask stacks "  Its stacks, comma-separated (see: playbook.sh list)?" "$(infer_stacks "$d")"
+      if [ "$stacks" = none ]; then stacks=""; fi
+      for s in $(echo "$stacks" | tr ',' ' '); do [ -f "$ROOT/stacks/$s.md" ] || die "unknown stack '$s' (see: playbook.sh list)"; done
+
+      line="\`$name-1\`"
+      sessions="$sessions"$'\n'"| \`$name-1\` | \`$name/\` | \`cd $name && claude -n $name-1\` |"
+      i=2
+      while [ "$i" -le "$n" ]; do
+        line="$line, \`$name-$i\`"
+        sessions="$sessions"$'\n'"| \`$name-$i\` | \`$name/\`, in its own worktree | \`cd $name && claude -n $name-$i -w $name-$i\` |"
+        i=$((i + 1))
+      done
+      members="$members"$'\n'"| \`$name/\` | $role | $line | ${stacks:-none} |"
+      ignores="$ignores/$name/"$'\n'
+
+      if [ -e "$d/AGENTS.md" ]; then
+        note "kept   $name/AGENTS.md (exists; run /playbook:bootstrap-project there if section 8 isn't filled in)"
+      else
+        ask a "  $name/ has no AGENTS.md. Set it up with the playbook now? (y/n)" y
+        if is_yes "$a"; then setup="$setup$name|$stacks"$'\n'; fi
+      fi
+    else
+      case "$(echo "$name" | tr 'A-Z' 'a-z')" in ref|refs|reference*|spec*|design*) a=y ;; *) a=n ;; esac
+      ask a "Is $name/ reference material that agents read but never change? (y/n)" "$a"
+      if is_yes "$a"; then refs="$refs, \`$name/\`"; fi
+    fi
+  done
+  [ -n "$members" ] || die "no repositories chosen: a workspace needs at least one member repository"
+  refs="${refs#, }"
+
+  # AGENTS.md: the playbook's sections 1–7 unchanged, the workspace's section 8, then the tracker section.
+  f="$ws/AGENTS.md"
+  if [ -e "$f" ] && [ "$FORCE" -ne 1 ]; then f="$ws/AGENTS.playbook.md"; note "AGENTS.md exists: merge AGENTS.playbook.md into it (the workspace's rules win)"; fi
+  { core_rules
+    M="| Repository | Role | Sessions | Stacks |"$'\n'"| -- | -- | -- | -- |$members" \
+    S="| Session | Where | Start it with |"$'\n'"| -- | -- | -- |"$'\n'"$sessions" \
+    R="${refs:-none}" awk '
+      $0 == "<!-- members -->" { print ENVIRON["M"]; next }
+      $0 == "<!-- sessions -->" { print ENVIRON["S"]; next }
+      # Not sub(): a folder name can hold "&", which sub() reads as the matched text.
+      (i = index($0, "<!-- references -->")) { $0 = substr($0, 1, i - 1) ENVIRON["R"] substr($0, i + length("<!-- references -->")) }
+      { print }' "$ROOT/templates/workspace/AGENTS.md"
+    if [ -n "$tracker" ]; then echo; cat "$ROOT/trackers/$tracker.md"; fi
+  } > "$f"
+  note "wrote  $f"
+  if [ ! -e "$ws/CLAUDE.md" ]; then cp "$ROOT/templates/CLAUDE.md" "$ws/CLAUDE.md"; note "wrote  $ws/CLAUDE.md"
+  elif ! grep -q '@AGENTS.md' "$ws/CLAUDE.md"; then note "CLAUDE.md exists without @AGENTS.md: add that line"; fi
+  f="$ws/.claude/settings.json"
+  if [ ! -e "$f" ]; then
+    mkdir -p "$ws/.claude"; printf '{\n  "worktree": { "baseRef": "head" }\n}\n' > "$f"
+    note "wrote  $f (agent worktrees start from the current branch)"
+  fi
+
+  # The lead's records. Never replaced, even with --force: they hold the workspace's history.
+  mkdir -p "$ws/docs/workspace"
+  for f in STATUS.md HANDOFFS.md DECISIONS.md; do
+    if [ -e "$ws/docs/workspace/$f" ]; then note "kept   $ws/docs/workspace/$f"; continue; fi
+    if [ "$f" = DECISIONS.md ]; then cp "$ROOT/templates/decision-log.md" "$ws/docs/workspace/$f"
+    else cp "$ROOT/templates/workspace/$f" "$ws/docs/workspace/$f"; fi
+    note "wrote  $ws/docs/workspace/$f"
+  done
+
+  # Member repositories keep their own history, so the workspace repository ignores them. Without a final
+  # newline, the first added entry would join the file's last line, and neither would be ignored.
+  if [ -s "$ws/.gitignore" ] && [ -n "$(tail -c 1 "$ws/.gitignore")" ]; then echo >> "$ws/.gitignore"; fi
+  printf '%s\n' "$ignores" ".claude/worktrees/" | while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    grep -qxF "$line" "$ws/.gitignore" 2>/dev/null && continue
+    echo "$line" >> "$ws/.gitignore"; note "added  $line to $ws/.gitignore"
+  done
+
+  printf '%s' "$setup" | while IFS='|' read -r name stacks; do
+    [ -n "$name" ] || continue
+    echo
+    if [ -n "$tracker" ]; then PLAYBOOK_NO_NEXT=1 install_project "$ws/$name" --stack "$stacks" --tracker "$tracker"
+    else PLAYBOOK_NO_NEXT=1 install_project "$ws/$name" --stack "$stacks"; fi
+  done
+
+  cat <<EOF
+
+Next:
+  0. Claude Code: each person installs the plugin once per machine (README, "Choosing how to install").
+     The lead skill and the session-start message that tells each session its role come from the plugin.
+  1. Fill in "## 8. This workspace" in AGENTS.md: what it is, the PRD and the tracker project.
+  2. In each member repository, run /playbook:bootstrap-project. It fills in that repository's section 8, adds
+     .claude/worktrees/ to its .gitignore and sets up .worktreeinclude, which a second session's worktree needs.
+  3. Start each session in its own terminal or Code tab, with the commands under "Sessions" in AGENTS.md.
+     Run them all on the same side (all native, or all inside WSL): sessions can't message across.
+  4. Give the lead the work (a ticket or a description). It routes the pieces and keeps docs/workspace/ current.
+  5. Commit AGENTS.md, CLAUDE.md, .gitignore, .claude/settings.json and docs/workspace/ on a branch.
 EOF
 }
 
@@ -226,8 +390,9 @@ list() {
 cmd="${1:-}"; [ $# -gt 0 ] && shift
 case "$cmd" in
   project) install_project "$@" ;;
+  workspace) install_workspace "$@" ;;
   user) install_user "$@" ;;
   prompts) build_prompts "$@" ;;
   list) list ;;
-  *) sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
+  *) sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
 esac
