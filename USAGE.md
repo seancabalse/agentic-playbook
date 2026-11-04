@@ -165,7 +165,7 @@ Claude copies the checklist into a dated doc and works through it: CI, `verify-f
 A handoff looks like this (shape in `templates/handoff.md`):
 
 ```
-## Handoff: qa-verifier → orchestrator · ACME-42 · 2026-10-27 14:05 +08
+## Handoff: qa-verifier → orchestrator · ACME-42 · 2026-10-27 06:05 UTC
 Goal: invoices show a status chip; loading/error/offline/empty states
 State: partial
 Evidence: `npx playwright test e2e/invoices.spec.ts` → 6 passed;

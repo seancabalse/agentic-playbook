@@ -23,6 +23,14 @@ Words in this skill:
 - **Contract**: the agreed interface between two repositories, for example an endpoint, a payload, an event, a shared type or an error code.
 - **Route**: send an item or a next step to a session, and record that you sent it.
 
+## Commands that read files
+
+Some machines block reads outside the working directories of a session (`permissions.blockReadsOutsideWorkingDirectories`). If the block cannot examine a command before it runs, it asks the person. A background session cannot show that question, so the session stops.
+
+- Use the Read tool to read a file.
+- In a shell command, write each path in full. Do not use loops, variables, `cd` or command substitution in a command that reads files.
+- Use one command for each repository. Example: `git -C backend status --short --branch`.
+
 ## 1. Find the current state
 
 1. Read these files:
@@ -52,9 +60,9 @@ Words in this skill:
 ## 3. Route an item to a member
 
 1. Send one message for each item to the session of that repository (`SendMessage`, with the session name from section 8).
-2. Make each message complete. The member cannot see your conversation. Put these in the message:
+2. Make each message complete. The member cannot see your conversation. The member also cannot read the workspace files: the workspace folder is outside its repository. Put these in the message:
    - The ticket id, the goal and the acceptance criteria.
-   - The contract and the decisions that apply. Quote them, and give their location in `DECISIONS.md`.
+   - The full text of the contract and of the decisions that apply. Do not tell the member to read `DECISIONS.md`.
    - The branch for the work, with a name from the ticket.
    - The files or the area that the member can change.
    - The checks that you will do again when the member completes the item.

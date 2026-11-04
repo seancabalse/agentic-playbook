@@ -1,4 +1,4 @@
-## Handoff: <from> → <to> · <ticket> · <YYYY-MM-DD HH:MM zone>
+## Handoff: <from> → <to> · <ticket> · <YYYY-MM-DD HH:MM UTC>
 
 **Goal**: <acceptance criteria, or what "done" means for this step>
 **State**: done | partial | blocked (<why>)
