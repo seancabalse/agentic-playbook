@@ -27,6 +27,7 @@ Rules: `${CLAUDE_PLUGIN_ROOT}/principles/15-agent-collaboration.md`. Shape: `${C
 3. **Deliver it**:
    - **To a subagent's caller**: as your final message.
    - **To a later session, another tool or a person**: as a comment on the ticket (via the tracker in `AGENTS.md` → Tracker), and in the PR description if a PR is open.
+   - **In a workspace member** (the session-start message tells you): send the handoff to the lead with `SendMessage`. Also put it on the ticket. Do not send it to another member. The lead sends the next step.
 4. **Stop the processes you started**, unless the handoff names them under "Still running" with an owner.
 5. **Before handing a bug or a review finding to a person** (human in the loop), try it first in a worktree (`reproduce-in-worktree`): the handoff carries the reproduction, what you tried, the result, the worktree path and branch, and your recommendation. Hand off without trying only when trying needs something you don't have, and say what.
 

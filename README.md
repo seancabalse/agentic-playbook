@@ -14,6 +14,7 @@ An engineering playbook for AI coding agents. It gives Claude Code, Codex, Curso
 - [Install for every project on this machine](#install-for-every-project-on-this-machine)
 - [Install from GitHub](#install-from-github)
 - [Set up a project](#set-up-a-project)
+- [A workspace with several repositories](#a-workspace-with-several-repositories)
 - [Using it with other tools](#using-it-with-other-tools)
 - [Customising](#customising)
 - [Skills and agents](#skills-and-agents)
@@ -32,9 +33,9 @@ An engineering playbook for AI coding agents. It gives Claude Code, Codex, Curso
 | `templates/` | ADR, decision log, architecture, runbook, PRD, requirements brief, ticket, PR description, handoff, threat model, release checklist, audit report, testing templates, and Claude Code settings (`claude-settings.json`, `worktreeinclude`). |
 | `stacks/` | Stack-specific rules appended to a project's `AGENTS.md`. Which stacks exist depends on the branch. |
 | `trackers/` | How agents use the issue tracker: Linear, Jira (with Confluence), or GitHub Issues and Projects. |
-| `skills/` | 22 skills: repeatable procedures such as `start-task`, `implement`, `verify-feature`, `security-audit` and `ship-pr`. |
+| `skills/` | 23 skills: repeatable procedures such as `start-task`, `implement`, `verify-feature`, `security-audit` and `ship-pr`. |
 | `agents/` | 8 subagents: product owner, product engineer, architect, QA verifier, code reviewer, security auditor, design reviewer and docs keeper. |
-| `hooks/` | Claude Code hooks: one tells agents where the playbook and the project's overrides are; one blocks AI attribution and secrets in commits and PRs. |
+| `hooks/` | Claude Code hooks: one tells agents where the playbook and the project's overrides are, and in a workspace who the lead is; one blocks AI attribution and secrets in commits and PRs. |
 | `scripts/playbook.sh` | The installer. |
 | `USAGE.md` | Worked examples. |
 
@@ -170,6 +171,43 @@ The machine-wide install and the project setup do different jobs, and you need b
 | A teammate's clone of a set-up repository | Don't run it. The teammate installs the plugin on their machine; the committed `AGENTS.md`, `CLAUDE.md` and `.claude/settings.json` do the rest. |
 | A machine that can't install the plugin | Run `playbook.sh project <repo> --tools claude,agents` from a clone. It copies the skills and agents into the repository, so the skill is then `/bootstrap-project`, without the `playbook:` prefix. Don't also install the plugin: every skill would load twice. |
 
+## A workspace with several repositories
+
+When one project spans several repositories, such as a frontend and a backend, put them in a **workspace**: a folder that is its own git repository (the main repository), with each project repository cloned inside it and any reference material beside them.
+
+```text
+shop/                  ← the workspace repository; the lead session runs here
+├── AGENTS.md          ← sections 1–7 of the playbook, and section 8 for the workspace
+├── docs/workspace/    ← the lead's records: STATUS.md, HANDOFFS.md, DECISIONS.md
+├── backend/           ← its own git repository, ignored by the workspace
+├── frontend/          ← its own git repository, ignored by the workspace
+└── refs/              ← reference material: read, never changed
+```
+
+Set it up from a clone of the playbook (on Windows, in Git Bash):
+
+```bash
+~/code/agentic-playbook/scripts/playbook.sh workspace ~/code/shop
+```
+
+It asks, one question at a time (Enter keeps the answer in brackets):
+
+1. Whether this folder is the workspace repository, and whether to run `git init` if it isn't one yet.
+2. The tracker.
+3. For each folder, in alphabetical order:
+   - **A git repository**: whether it's part of the project, its role (frontend, backend or other), how many agent sessions work in it, and its stacks (suggested from its manifests). If it has no `AGENTS.md`, whether to set it up now (the same as `playbook.sh project`).
+   - **Any other folder**: whether it's reference material.
+
+It writes `AGENTS.md` (with the members, the sessions and their start commands, and the workspace rules), `CLAUDE.md`, `docs/workspace/`, `.claude/settings.json`, and `.gitignore` entries for the member repositories. Run it again at any time: it never replaces a file without `--force`, and never replaces the records.
+
+Then:
+
+1. Fill in section 8 of the workspace's `AGENTS.md`, and run `/playbook:bootstrap-project` in each member repository.
+2. Start each session in its own terminal or Code tab, with the names from the "Sessions" table, such as `claude -n lead` at the root and `cd backend && claude -n backend-1`. A second session in a repository gets its own worktree: `claude -n backend-2 -w backend-2`.
+3. Give the lead the work. It plans across the repositories, agrees the contracts between them, sends each piece to its session, checks each handoff, runs the tests that need more than one repository, and keeps the records (`/playbook:lead`).
+
+Members send their handoffs to the lead, and the lead routes the next step. The sessions talk through Claude Code's [cross-session messages](https://code.claude.com/docs/en/cross-session-messaging.md), which need no setup. Run them all on the same machine; on Windows, all natively or all inside WSL, because the two can't message each other. The roles and rules are in `principles/15-agent-collaboration.md`, "Across repositories".
+
 ## Using it with other tools
 
 | Tool | Always-on rules | Procedures |
@@ -208,6 +246,7 @@ Sections 1–4 of `AGENTS.md` stay the same in every project. Sections 5–7 are
 | `verify-feature` | Walk the acceptance criteria in the running product, including error and edge states. |
 | `capture-screenshots` | Capture states × sizes × settings as evidence for a PR. |
 | `handoff` | Write or resume a handoff between agents, sessions or people. |
+| `lead` | Lead a workspace of several repositories: split the work, agree the contracts, route handoffs between the sessions, and keep the records. |
 | `docs-upkeep` | Keep `AGENTS.md`, the decision log, the architecture doc and the runbook current. |
 | `write-adr`, `log-decision` | Record hard-to-reverse choices and everyday decisions. |
 | `architecture-review`, `design-review`, `a11y-audit` | Structural, UX and accessibility reviews. |
