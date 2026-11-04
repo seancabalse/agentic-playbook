@@ -18,7 +18,7 @@ claude plugin install playbook@agentic-playbook --scope user
 Or straight from GitHub: `/plugin marketplace add seancabalse/agentic-playbook#all`, then `/plugin install playbook@agentic-playbook`.
 
 - Skills are `/playbook:<name>` (e.g. `/playbook:start-task ACME-42`). Agents and the session hook work by themselves.
-- Check what it adds: `claude plugin details playbook@agentic-playbook` shows 22 skills, 8 agents and 2 hooks, at about 1.1k tokens per session for the skill and agent descriptions.
+- Check what it adds: `claude plugin details playbook@agentic-playbook` shows 23 skills, 8 agents and 2 hooks, at about 1.1k tokens per session for the skill and agent descriptions.
 - Update: `git pull` in the clone (or `claude plugin update playbook@agentic-playbook` for a GitHub install), then start a new session.
 - **For a team repo**: commit `.claude/settings.json` from the playbook's `templates/claude-settings.json`. Everyone who trusts the repo is offered the plugin.
 
@@ -268,3 +268,53 @@ What it should do, in ASD-STE100 (Simplified Technical English):
 5. **Agree and record**: you agree, it posts the brief on the ticket and logs the decisions. Then `start-task` plans the build.
 
 In `/deliver-feature`, the **product-owner** agent does the same work. A subagent cannot ask you questions directly. So it returns the questions to the main session, which asks you and runs it again with your answers, until the brief is ready.
+
+---
+
+## 14. A frontend and a backend: a workspace
+
+The `shop` project has `shop-web` (Nx, React) and `shop-api` (Nx, Node), and a `refs/` folder of API specs. Put them in one folder and set it up as a workspace:
+
+```bash
+mkdir -p ~/code/shop/refs && cd ~/code/shop          # put the API specs in refs/
+git clone <shop-web url> && git clone <shop-api url>
+~/code/agentic-playbook/scripts/playbook.sh workspace .
+#   Is ~/code/shop the workspace (main) repository, where the lead session runs? (y/n) [y]:
+#   It isn't a git repository yet. Run git init? (y/n) [y]:
+#   Tracker (linear, jira, github or none)? [none]: jira
+#   Is refs/ reference material that agents read but never change? (y/n) [y]:
+#   Is shop-api/ (a git repository) part of the project? (y/n) [y]:
+#     Its role (frontend, backend or other)? [backend]:
+#     How many agent sessions will work in it? [1]: 2
+#     Its stacks, comma-separated (see: playbook.sh list)? [nx-monorepo,node-service]:
+#     shop-api/ has no AGENTS.md. Set it up with the playbook now? (y/n) [y]:
+#   Is shop-web/ (a git repository) part of the project? (y/n) [y]:
+#   …
+```
+
+The folders come in alphabetical order. To pipe the answers in instead, give them in this order.
+
+Fill in section 8 of `~/code/shop/AGENTS.md`, run `/playbook:bootstrap-project` in `shop-web/` and `shop-api/`, then start the sessions from the "Sessions" table, each in its own terminal:
+
+```bash
+claude -n lead                                   # in ~/code/shop
+cd shop-api && claude -n shop-api-1
+cd shop-api && claude -n shop-api-2 -w shop-api-2
+cd shop-web && claude -n shop-web-1
+```
+
+In the lead session:
+
+```
+/playbook:lead SHOP-31 Customers can save a cart and come back to it
+```
+
+What it should do:
+1. Read the workspace records and check which sessions are running (and give you the start command for any that isn't).
+2. Plan the work across the repositories, and ask you the product questions.
+3. Write the contract first (`POST /carts/{id}/save`: the payload, the errors, and which side owns it) in `docs/workspace/DECISIONS.md`.
+4. Send `shop-api-1` the endpoint, and `shop-web-1` the screen against a stub of the contract, each as one self-contained message.
+5. When a handoff arrives, log it in `docs/workspace/HANDOFFS.md`, re-run its key check in a throwaway worktree, update `STATUS.md`, and route the next step (for example, "the endpoint is on `SHOP-31-save-cart`; switch the screen from the stub").
+6. Run the end-to-end check with both branches, record the result in `STATUS.md`, post a summary on the ticket, and stop for you to review and merge each PR.
+
+The members follow the playbook as usual in their repositories. Their session-start message tells them the lead's name, and `handoff write` sends their handoff to the lead as well as posting it on the ticket.
