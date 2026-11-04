@@ -51,6 +51,27 @@ docs-keeper: docs-upkeep ──handoff──▶ orchestrator posts a summary han
 STOP: owner runs /ship-pr (or asks for changes) ──▶ owner merges
 ```
 
+## Across repositories (a workspace)
+
+Some projects have more than one repository, for example a frontend and a backend. For these projects, use a **workspace**. A workspace is a git repository for coordination. It contains a separate clone of each project repository, and the reference material. To make a workspace, run `playbook.sh workspace`.
+
+| Role | Where it works | What it changes |
+| -- | -- | -- |
+| **Owner** | Anywhere | Decides, examines and merges |
+| **Lead** | A session at the workspace root. It obeys the `lead` skill. | Only the workspace repository: the records in `docs/workspace/` |
+| **Members** | One or two sessions in each repository. Each obeys the `AGENTS.md` of its repository. A second session in a repository uses its own worktree. | Only its own repository |
+
+The rules above apply. These rules also apply:
+
+1. **All handoffs go to the lead.** A member sends its handoff to the lead. The lead sends the next step. A member does not send work to another member.
+2. **Write the contract first.** Some changes cross repositories: an endpoint, an event or a shared type. The lead records the contract before a member builds. If the contract is difficult to change later, the owner must accept it first.
+3. **A message does not keep a record.** Sessions send handoffs with the cross-session messages of Claude Code. Claude Code does not keep these messages. Thus, the lead records each handoff:
+   - In `docs/workspace/HANDOFFS.md`, and on the ticket (rule 9).
+   - The progress and the cross-repository tests go in `STATUS.md`.
+   - The trade-offs go in `DECISIONS.md`.
+4. **The lead does the checks across repositories.** The lead does the important check of a member again, in a temporary worktree of the branch. The lead also runs the checks that use more than one repository.
+5. **Use one machine.** Run all the sessions of a workspace on the same machine. On Windows, run all of them natively, or all of them in WSL. A session in WSL cannot send a message to a native Windows session.
+
 ## Across sessions and tools
 
 - **Ending a session mid-task**: run `handoff write`. It posts the note on the ticket, pushes the branch if asked, and lists anything still running.
