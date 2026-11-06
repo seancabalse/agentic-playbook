@@ -221,14 +221,43 @@ A task that needs another session later, for review comments or a failed check, 
 
 ### Moving sessions that are already running to this flow
 
-A plugin update doesn't change sessions that are already running: each keeps the version it started with. Switch when it suits you:
+A plugin update doesn't change sessions that are already running: each keeps the version it started with until you restart it. So nothing breaks, and you can switch at a clean point. Don't stop a session in the middle of a task.
 
-1. Let tasks that are almost done finish as they are.
-2. In each other member session, ask it to stop at a clean point, commit and push its branch, and send its handoff to the lead with its worktree path.
-3. Ask the old lead to record every handoff and to put each branch, commit and worktree in `STATUS.md`. Then close it.
-4. Update the plugin, start a new lead (`claude -n lead`) and tell it: "`/playbook:lead KEY-10`. This epic is already in progress. Don't plan it again. Build the epic file from `STATUS.md`, `HANDOFFS.md` and the pushed branches. Make each existing branch one task. Add the remaining work as new tasks under its stories."
-5. When the lead gives a task a new session, close the old member session of that task first. Then start the new one. For a task that continues a branch, the new session starts in the branch's existing worktree, without `-w`.
+**The simplest route:** if none of the work is urgent, finish the current epic with the old sessions, and use the new flow from the next epic.
 
+**To switch an epic that is in progress** (for example, a lead with three backend and three frontend sessions):
+
+1. **Sort the member sessions.** Ask the old lead which tasks are nearly done and which are half started or not broken down well.
+   - Nearly done: let them finish under the old flow, open their PRs and close. Moving them costs more than it saves.
+   - Everything else: move it with the steps below.
+
+2. **Bring each remaining member to a safe stop.** In each of those sessions, type:
+
+   > Stop at the next clean point. Commit your work on your branch, push it, and write `/playbook:handoff write` to the lead. Include what is done, what remains, and your worktree path.
+
+   Commit and push before you close the session. When you close a session that was started with `-w`, Claude Code can offer to remove its worktree. When the branch is pushed, nothing is lost, whatever you answer.
+
+3. **Let the old lead record everything.** When all the handoffs have arrived, ask it:
+
+   > Record every handoff in HANDOFFS.md and update STATUS.md with each branch, commit and worktree path. Commit the records.
+
+   Then close the old lead.
+
+4. **Update the plugin and start a new lead** (`claude -n lead`; in the desktop app, a new session with `/rename lead`). Give it:
+
+   > /playbook:lead KEY-10. This epic is already in progress under the old flow. Don't plan it from scratch. Build docs/workspace/epics/KEY-10.md from STATUS.md, HANDOFFS.md and the pushed branches. Treat the work on each existing branch as one task, and add the remaining work as new tasks under the right stories. Write a brief for each task that continues a branch, with the branch, its commit and the last handoff. Ask me where to keep the briefs.
+
+   Don't ask it to split branches that already exist. Splitting a half-built branch into neat tasks costs more than it saves. The new breakdown only needs to cover work that isn't written yet.
+
+5. **Replace the old member sessions one task at a time.** When the lead gives a task a new session, close the old session of that task first, then start the new one. For a task that continues a branch, start the new session in that branch's existing worktree, without `-w`:
+
+   ```bash
+   cd backend/.claude/worktrees/backend-2 && claude -n backend-KEY-13 "/playbook:start-task KEY-13"
+   ```
+
+   Git lets a branch be checked out in only one worktree at a time, so reusing the old worktree is simpler than making a new one. The session-start message works inside worktrees. New tasks get new sessions, with the commands the lead gives you.
+
+6. **Clean up.** When a task's PR is merged, remove its worktree, for example `git -C backend worktree remove .claude/worktrees/backend-2`.
 
 Members send their handoffs to the lead, and the lead routes the next step. The sessions talk through Claude Code's [cross-session messages](https://code.claude.com/docs/en/cross-session-messaging.md), which need no setup. Run them all on the same machine; on Windows, all natively or all inside WSL, because the two can't message each other. The roles and rules are in `principles/15-agent-collaboration.md`, "Across repositories".
 
