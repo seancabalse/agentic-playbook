@@ -4,7 +4,7 @@ Small changes, always shippable, deployed by machines.
 
 ## Branches and PRs
 
-1. **Short-lived branches from the default branch**, named from the ticket (`<user>/proj-123-short-title`). Stacked branches are fine, but rebase onto the default branch once the base merges.
+1. **Short-lived branches from the default branch**, named from the ticket (`<user>/proj-123-short-title`). Stacked branches are fine, but rebase onto the default branch once the base merges. On a busy team branch, rebase often (`sync-branch`): at the start of a task, when the playbook hook says the branch is behind or a conflict is coming, and before each push, handoff and PR.
 2. **One concern per PR**, with the description from `templates/pr-description.md`. The owner reviews and merges.
 3. **Branches auto-delete after merge.** Don't push to a merged branch: open a new one.
 4. **Commit messages and PRs follow the working agreement**: the why, the ticket id, and no AI attribution.

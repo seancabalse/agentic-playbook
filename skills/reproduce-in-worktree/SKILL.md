@@ -53,5 +53,5 @@ A worktree is a second checkout of the same repository in its own folder. You ca
 ## Rules
 
 - One writer per worktree. Never edit the main checkout from a worktree session, and never edit another agent's worktree.
-- Worktrees share one `.git`: don't run commands that rewrite shared refs (`reset --hard` on a shared branch, `gc --prune`, force pushes) while others work.
+- Worktrees share one `.git`: don't run commands that rewrite shared refs (`reset --hard` on a shared branch, `gc --prune`, force pushes to a branch someone else uses, `rebase --update-refs`, `git stash` that another session could pop) while others work. Rebasing and force-pushing your own task branch with `sync-branch` is fine.
 - Reviewers stay read-only in the main checkout. In their own disposable worktree they may add a failing test to prove a finding; the test goes into the handoff, not into the reviewed branch.
