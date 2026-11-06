@@ -33,19 +33,28 @@ Run `docs-upkeep`: `AGENTS.md` rules, Decision Log, Architecture, runbook traps,
 - The message is an imperative subject with the ticket id, then a body explaining what changed for the user and why.
 - **No `Co-Authored-By`, no "Generated with", no AI mention**, even if a tool default suggests one.
 
-## 5. PR
+## 5. Screenshots gate
+
+List what the branch changes: `git diff --name-only <base>...HEAD`. If any change can alter what a person sees (components, screens, pages or routes, styles and design tokens, copy in the message catalogue, images and icons, email, notification or PDF templates), the PR needs screenshots:
+
+- They must exist before you open the PR: `screenshots/<ticket>/`, from `capture-screenshots` (before and after, plus the states and settings that matter, per `principles/04-design-and-ux.md` #17).
+- If they're missing, **stop and capture them**. If the app can't run here (a device, an account or data you don't have), stop and ask the owner; don't open the PR without them unless the owner says so in this conversation.
+- Only if nothing a person sees changes (a refactor, a type-only or test-only change), write `Screenshots: none — <why nothing visible changes>` in the PR body instead.
+
+## 6. PR
 
 - Bring the branch up to date with `sync-branch` (rebase onto the team branch, checks, `--force-with-lease`). Then push the branch, and open the PR against the default branch (or the stacked base, if its PR is still open; check it isn't already merged).
+- **The title becomes the commit on the team branch** (PRs are squash-merged, `principles/10-delivery-ci-release.md` #3): imperative, customer-facing, with the ticket id. Don't squash the branch yourself.
 - Fill the body from `${CLAUDE_PLUGIN_ROOT}/templates/pr-description.md`:
   - **Verified**: actual results.
   - **Not verified**: honestly stated.
   - **Needs**: new build, env var, owner action.
-  - **Screenshots** for UI changes, from `capture-screenshots` (`screenshots/<ticket>/`). Publish them with `${CLAUDE_PLUGIN_ROOT}/templates/testing/push-screenshots.sh <PR> <files…>` (or the project's own script) to a `screenshots` branch, never the default branch. Embed the lines it prints, and check each image loads.
+  - **Screenshots** for UI changes, from the gate in section 5. Publish them with `${CLAUDE_PLUGIN_ROOT}/templates/testing/push-screenshots.sh <PR> <files…>` (or the project's own script) to a `screenshots` branch, never the default branch. Embed the lines it prints, and check each image loads.
 - No AI attribution in the PR body either.
 
-## 6. Afterwards
+## 7. Afterwards
 
 - Move the ticket to the tracker's review status, link the PR the way that tracker links them, and comment with what was done and how it was verified (a `handoff` note). See `AGENTS.md` → "Tracker".
 - Watch CI. If it fails, fix it before starting other work.
 - Stop processes you started for this task.
-- Tell the owner: the PR link, what's verified, what isn't, and anything they need to do.
+- Tell the owner: the PR link, what's verified, what isn't, and anything they need to do. Merging is theirs, with **Squash and merge**.
