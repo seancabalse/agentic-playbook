@@ -369,6 +369,14 @@ Set up a project for this (`/bootstrap-project` does it):
 | `.worktreeinclude` | Copy `templates/worktreeinclude` | Gitignored files a worktree needs to run the app and tests, such as `.env`. Never list secrets a worktree doesn't need. |
 | `.gitignore` | `.claude/worktrees/` | Claude Code keeps its worktrees there. |
 
+**Merging.** PRs are squash-merged: one commit per PR on the team branch, titled from the PR, while the branch keeps its small commits for review. Set the repository to allow only that and to delete merged branches (`/bootstrap-project` lists it as an owner task):
+
+```bash
+gh repo edit --enable-squash-merge --enable-merge-commit=false --enable-rebase-merge=false --squash-merge-commit-message pr-title-description --delete-branch-on-merge
+```
+
+**Screenshots.** `/ship-pr` won't open a PR that changes anything a person sees (components, screens, styles, copy, images, email or notification templates) without screenshots from `capture-screenshots`. A PR with no visible change says why instead.
+
 ## Guardrails
 
 The plugin's hooks enforce two rules from the working agreement, so they don't depend on an agent remembering them:
