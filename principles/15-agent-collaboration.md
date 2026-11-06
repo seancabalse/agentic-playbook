@@ -58,8 +58,8 @@ Some projects have more than one repository, for example a frontend and a backen
 | Role | Where it works | What it changes |
 | -- | -- | -- |
 | **Owner** | Anywhere | Decides, examines and merges |
-| **Lead** | A session at the workspace root. It obeys the `lead` skill. | Only the workspace repository: the records in `docs/workspace/` |
-| **Members** | One or two sessions in each repository. Each obeys the `AGENTS.md` of its repository. A second session in a repository uses its own worktree. | Only its own repository |
+| **Lead** | A session at the workspace root. It obeys the `lead` skill. | Only the workspace repository: the records in `docs/workspace/` and the task briefs |
+| **Members** | A new session for each task, in the repository of the task. Each obeys the `AGENTS.md` of its repository. A second session in a repository at the same time uses its own worktree. | Only its own repository |
 
 The rules above apply. These rules also apply:
 
@@ -70,7 +70,8 @@ The rules above apply. These rules also apply:
    - The progress and the cross-repository tests go in `STATUS.md`.
    - The trade-offs go in `DECISIONS.md`.
 4. **The lead does the checks across repositories.** The lead does the important check of a member again, in a temporary worktree of the branch. The lead also runs the checks that use more than one repository.
-5. **Use one machine.** Run all the sessions of a workspace on the same machine. On Windows, run all of them natively, or all of them in WSL. A session in WSL cannot send a message to a native Windows session.
+5. **One task, one session.** An epic contains stories. A story is a change that a user can see, and it can need more than one repository. The lead tests each story across the repositories when its tasks are complete. A story contains tasks. A task is one PR in one repository. A new member session does each task, and the owner closes it when the lead has examined the handoff. The session starts from the brief of the task only: the epic in one sentence, the story and its acceptance criteria, the acceptance criteria of the task, the full text of the contracts, and the data from earlier tasks. The brief is in the tracker or in a Markdown file in the workspace repository, as the owner chooses. The lead keeps the plan of the epic in `docs/workspace/epics/<epic id>.md`. Thus, the context is in files, and a short session uses fewer tokens than a long session.
+6. **Use one machine.** Run all the sessions of a workspace on the same machine. On Windows, run all of them natively, or all of them in WSL. A session in WSL cannot send a message to a native Windows session.
 
 ## Across sessions and tools
 

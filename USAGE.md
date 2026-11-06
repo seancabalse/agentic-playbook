@@ -285,7 +285,6 @@ git clone <shop-web url> && git clone <shop-api url>
 #   Is refs/ reference material that agents read but never change? (y/n) [y]:
 #   Is shop-api/ (a git repository) part of the project? (y/n) [y]:
 #     Its role (frontend, backend or other)? [backend]:
-#     How many agent sessions will work in it? [1]: 2
 #     Its stacks, comma-separated (see: playbook.sh list)? [nx-monorepo,node-service]:
 #     shop-api/ has no AGENTS.md. Set it up with the playbook now? (y/n) [y]:
 #   Is shop-web/ (a git repository) part of the project? (y/n) [y]:
@@ -294,27 +293,34 @@ git clone <shop-web url> && git clone <shop-api url>
 
 The folders come in alphabetical order. To pipe the answers in instead, give them in this order.
 
-Fill in section 8 of `~/code/shop/AGENTS.md`, run `/playbook:bootstrap-project` in `shop-web/` and `shop-api/`, then start the sessions from the "Sessions" table, each in its own terminal:
+Fill in section 8 of `~/code/shop/AGENTS.md` and run `/playbook:bootstrap-project` in `shop-web/` and `shop-api/`. Then start only the lead:
 
 ```bash
 claude -n lead                                   # in ~/code/shop
-cd shop-api && claude -n shop-api-1
-cd shop-api && claude -n shop-api-2 -w shop-api-2
-cd shop-web && claude -n shop-web-1
 ```
 
-In the lead session:
+Give it the epic:
 
 ```
-/playbook:lead SHOP-31 Customers can save a cart and come back to it
+/playbook:lead SHOP-30 Customers can save a cart and come back to it
 ```
 
 What it should do:
-1. Read the workspace records and check which sessions are running (and give you the start command for any that isn't).
-2. Plan the work across the repositories, and ask you the product questions.
-3. Write the contract first (`POST /carts/{id}/save`: the payload, the errors, and which side owns it) in `docs/workspace/DECISIONS.md`.
-4. Send `shop-api-1` the endpoint, and `shop-web-1` the screen against a stub of the contract, each as one self-contained message.
-5. When a handoff arrives, log it in `docs/workspace/HANDOFFS.md`, re-run its key check in a throwaway worktree, update `STATUS.md`, and route the next step (for example, "the endpoint is on `SHOP-31-save-cart`; switch the screen from the stub").
-6. Run the end-to-end check with both branches, record the result in `STATUS.md`, post a summary on the ticket, and stop for you to review and merge each PR.
+1. Read the workspace records. If `docs/workspace/epics/SHOP-30.md` exists, continue from it instead of planning again.
+2. Ask you the product questions, and where to keep the task briefs:
+   > - **Jira sub-tasks of each story (recommended).** You and the sessions can read them, and they outlast every session.
+   > - **Another tracker** you name.
+   > - **Markdown files** in `docs/workspace/tasks/`, or another folder in the workspace you name.
+3. Divide the epic into stories, reusing those already under SHOP-30 in Jira, for example SHOP-31 "Save a cart". Then divide each story into tasks of one PR each: SHOP-32 (the endpoint, `shop-api`), SHOP-33 (the screen against a stub, `shop-web`) and SHOP-34 (the screen against the real endpoint, `shop-web`, after SHOP-32 and on top of SHOP-33).
+4. Write the contract first (`POST /carts/{id}/save`: the payload, the errors, and which side owns it) in `docs/workspace/DECISIONS.md`, and the plan in `docs/workspace/epics/SHOP-30.md`.
+5. Make the stories and the sub-tasks in Jira. For each task that can start now, write its self-contained brief on its sub-task, and give you one command to run in its own terminal:
+   ```bash
+   cd shop-api && claude -n shop-api-SHOP-32 "/playbook:start-task SHOP-32"
+   cd shop-web && claude -n shop-web-SHOP-33 "/playbook:start-task SHOP-33"
+   ```
+6. When a handoff arrives, log it in `docs/workspace/HANDOFFS.md`, re-run its key check in a throwaway worktree, and update `STATUS.md` and the epic file (for example, "the endpoint is on `SHOP-32-save-cart`"). Then tell you to close that session, and give you the command for the next task. When SHOP-34 starts, its brief contains the branch of the endpoint, and its base is SHOP-33's branch, which isn't merged yet.
+7. When the tasks of SHOP-31 are done, run its end-to-end check with both branches, record the result in `STATUS.md`, and post a summary on SHOP-31. You can review and merge that story's PRs while the lead starts the next story.
+
+Between tasks, you can close the lead and start a new one (`claude -n lead`, then `/playbook:lead SHOP-30`): it continues from the epic file.
 
 The members follow the playbook as usual in their repositories. Their session-start message tells them the lead's name, and `handoff write` sends their handoff to the lead as well as posting it on the ticket.
