@@ -4,6 +4,7 @@ The lead keeps this file at `docs/workspace/epics/<epic id>.md`. It is the memor
 
 **Source**: <the ticket link, or the local file or list that the owner gave>
 **Task briefs**: <the tracker, for example "Jira sub-tasks of each story"> or <the folder, for example `docs/workspace/tasks/`>. The owner chose this on <YYYY-MM-DD>.
+**Sessions started by**: <the owner> or <the lead, in the background: a maximum of <N> at the same time>
 
 ## Goal
 

@@ -6,7 +6,7 @@ The lead keeps this file. Update it when a handoff comes, when you start a task,
 
 | Story | Task (ticket) | Repository | Session | State | Branch / PR | Checks (command → result) | Next |
 | -- | -- | -- | -- | -- | -- | -- | -- |
-| <KEY-11> | <KEY-13 short title> | <backend/> | <backend-KEY-13, or "closed"> | planned · in progress · in review · blocked (<why>) · done | <branch> / <PR link> | <`npm test` → 42 passed> | <who does what> |
+| <KEY-11> | <KEY-13 short title> | <backend/> | <backend-KEY-13 (id 5609a6cc if the lead started it), or "closed"> | planned · in progress · in review · blocked (<why>) · done | <branch> / <PR link> | <`npm test` → 42 passed> | <who does what> |
 
 ## Cross-repository tests
 

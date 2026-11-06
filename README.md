@@ -205,7 +205,7 @@ Then:
 1. Fill in section 8 of the workspace's `AGENTS.md`, and run `/playbook:bootstrap-project` in each member repository.
 2. Start the lead at the root: `claude -n lead`.
 3. Give the lead an epic (`/playbook:lead KEY-10`, or a description). It asks the product questions, and where to keep the task briefs: in the tracker as sub-tasks of each story, or as Markdown files in `docs/workspace/tasks/`. It divides the epic into **stories** (changes a user can see, which can span repositories; it reuses the stories already in the tracker) and each story into **tasks** (one PR in one repository). It agrees the contracts between the repositories and writes a complete brief for each task.
-4. The lead works one story at a time where it can, and tests each story across the repositories as soon as its tasks are done, so you can review it early. For each task, the lead gives you the command for a **new** session, such as `cd backend && claude -n backend-KEY-13 "/playbook:start-task KEY-13"`. When the lead has checked the task's handoff, it tells you to close that session. When two sessions work in one repository at the same time, the second one gets its own worktree (`-w`).
+4. The lead works one story at a time where it can, and tests each story across the repositories as soon as its tasks are done, so you can review it early. For each task, the lead gives you the command for a **new** session, such as `cd backend && claude -n backend-KEY-13 "/playbook:start-task KEY-13"`. When the lead has checked the task's handoff, it tells you to close that session. With the CLI, you can let the lead start and stop these sessions itself (see below). When two sessions work in one repository at the same time, the second one gets its own worktree (`-w`).
 
 ### Why a new session for each task
 
@@ -218,6 +218,24 @@ A long session sends its whole conversation again with each message, so it uses 
 The lead can restart too, best when no member session is working: close its session, start a new one with `claude -n lead` and run `/playbook:lead KEY-10`. It continues from those files. Give the new session the name `lead`, because the members send their handoffs to that name.
 
 A task that needs another session later, for review comments or a failed check, keeps its sub-task and its branch. The lead adds the last handoff to the brief, and the new session starts in the branch's existing worktree.
+
+### Letting the lead start the sessions (CLI)
+
+By default you start each task's session with the command the lead gives you. If the lead runs in the Claude Code CLI, it can start and stop them itself, in the background. It asks you when it plans the epic, and you set the maximum number of member sessions at a time.
+
+Before you say yes:
+
+- **Trust each member repository once.** Open a normal session in `backend/`, `frontend/` and so on, and accept the trust question. A background session can't show it.
+- **The sessions run in auto mode** (`--permission-mode auto`), because a background session can't answer a permission prompt either. Auto mode lets a safety check approve actions instead of asking you. The lead never uses `bypassPermissions`.
+- **Keep every session on one side.** On Windows, run the lead and all members in the CLI inside WSL, or all natively; WSL and native Windows sessions can't message each other. The Claude Desktop app can't be started this way, so with Desktop you keep starting the sessions yourself.
+
+The lead starts each one like this (the parentheses keep the lead's own shell at the workspace root), and records the short id it prints:
+
+```bash
+(cd backend && claude --bg -n backend-KEY-13 --permission-mode auto "/playbook:start-task KEY-13")
+```
+
+To watch or step in, use `claude agents` (the list), `claude attach <id>` and `claude logs <id>`. When a task is done, the lead runs `claude stop <id>`, which keeps the conversation; it never runs `claude rm`. If a session stops at a permission or trust question, the lead tells you to open it with `claude attach <id>`. If a member asks a product question, the lead passes it to you and sends your answer back.
 
 ### Moving sessions that are already running to this flow
 

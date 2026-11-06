@@ -311,6 +311,8 @@ What it should do:
    > - **Jira sub-tasks of each story (recommended).** You and the sessions can read them, and they outlast every session.
    > - **Another tracker** you name.
    > - **Markdown files** in `docs/workspace/tasks/`, or another folder in the workspace you name.
+
+   It also asks who starts the member sessions: you, with the commands it gives you (the default), or the lead itself in the background (CLI only; you set the maximum at a time, and trust each repository folder once first).
 3. Divide the epic into stories, reusing those already under SHOP-30 in Jira, for example SHOP-31 "Save a cart". Then divide each story into tasks of one PR each: SHOP-32 (the endpoint, `shop-api`), SHOP-33 (the screen against a stub, `shop-web`) and SHOP-34 (the screen against the real endpoint, `shop-web`, after SHOP-32 and on top of SHOP-33).
 4. Write the contract first (`POST /carts/{id}/save`: the payload, the errors, and which side owns it) in `docs/workspace/DECISIONS.md`, and the plan in `docs/workspace/epics/SHOP-30.md`.
 5. Make the stories and the sub-tasks in Jira. For each task that can start now, write its self-contained brief on its sub-task, and give you one command to run in its own terminal:
@@ -318,6 +320,7 @@ What it should do:
    cd shop-api && claude -n shop-api-SHOP-32 "/playbook:start-task SHOP-32"
    cd shop-web && claude -n shop-web-SHOP-33 "/playbook:start-task SHOP-33"
    ```
+   If you chose that the lead starts the sessions, it runs these itself with `--bg --permission-mode auto`, and stops each one with `claude stop <id>` when its task is done.
 6. When a handoff arrives, log it in `docs/workspace/HANDOFFS.md`, re-run its key check in a throwaway worktree, and update `STATUS.md` and the epic file (for example, "the endpoint is on `SHOP-32-save-cart`"). Then tell you to close that session, and give you the command for the next task. When SHOP-34 starts, its brief contains the branch of the endpoint, and its base is SHOP-33's branch, which isn't merged yet.
 7. When the tasks of SHOP-31 are done, run its end-to-end check with both branches, record the result in `STATUS.md`, and post a summary on SHOP-31. You can review and merge that story's PRs while the lead starts the next story.
 

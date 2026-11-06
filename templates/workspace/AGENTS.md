@@ -15,7 +15,7 @@ All other folders in this workspace are not part of the project. Agents do not r
 
 ### Sessions
 
-Start the lead first. The lead gives each task a new member session, named `<repository>-<task id>` (for example `backend-KEY-13`), and gives you its full start command. Start each session in a different terminal or Code tab. Give each session its name with `-n` (in the desktop app, use `/rename`). Sessions send messages to each other by name. When the lead tells you that a task is complete, close its session.
+Start the lead first. The lead gives each task a new member session, named `<repository>-<task id>` (for example `backend-KEY-13`), and gives you its full start command. Start each session in a different terminal or Code tab. Give each session its name with `-n` (in the desktop app, use `/rename`). Sessions send messages to each other by name. When the lead tells you that a task is complete, close its session. If you agree, a lead that runs in the Claude Code CLI can start the member sessions itself, in the background (`claude --bg`). Then it also stops them. Before that, open one normal session in each member repository and accept the trust question.
 
 <!-- sessions -->
 
