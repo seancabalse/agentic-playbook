@@ -153,6 +153,9 @@ When a handoff comes:
 1. **Record it.** Put the handoff at the top of `HANDOFFS.md`, as you received it.
 2. **Examine it.** A handoff is a claim, not proof. Do not change the checkout of the member.
    - Read the branch: `git -C <repo> log` and `git -C <repo> diff <base>...<branch>`.
+   - Predict the conflicts with the team branch: `git -C <repo> fetch origin <team branch>`, then `git -C <repo> merge-tree --write-tree --name-only --no-messages <branch> origin/<team branch>`. Use the local branch: the worktrees of a repository share their branches, and a branch is often not pushed yet. Do the same check against the branch of each other task that is in progress in that repository.
+     - Exit code 1 and file names after the first line: send the files to the member sessions of the two branches, and tell them to do `sync-branch`. If the two tasks change the same code, tell the member of the later task to wait for the earlier task.
+     - Any other result without file names: the check failed (for example, the branch does not exist). Do not send a sync request. Write the failure in `STATUS.md`.
    - Make a temporary worktree of that branch (`reproduce-in-worktree`). Run one important test command in it.
    - Remove the worktree when you finish.
    - If you cannot do the check, write that in `STATUS.md`.
