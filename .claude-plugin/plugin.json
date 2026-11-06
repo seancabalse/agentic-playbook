@@ -1,7 +1,7 @@
 {
   "name": "playbook",
   "description": "Agentic engineering playbook: a working agreement, principles, stack rules, templates, and skills and agents for requirements, planning, building, ADRs, reviews, audits, verification and shipping. Works with Linear, Jira or GitHub Issues. Projects override any file in .playbook/local/.",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "author": { "name": "Sean Cabalse" },
   "keywords": ["engineering", "playbook", "principles", "adr", "code-review", "security", "accessibility", "testing", "agents", "typescript"]
 }

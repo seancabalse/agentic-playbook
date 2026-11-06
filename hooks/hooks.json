@@ -1,5 +1,5 @@
 {
-  "description": "SessionStart: tells Claude where the playbook is and which files the project overrides. PreToolUse (Bash): blocks AI attribution in commits and PRs, and secrets in commits.",
+  "description": "SessionStart: tells Claude where the playbook is and which files the project overrides, and whether its branch is behind the team branch. PreToolUse (Bash): blocks AI attribution in commits and PRs, and secrets in commits; before a commit or push, warns when a rebase onto the team branch would conflict.",
   "hooks": {
     "SessionStart": [
       {
@@ -7,6 +7,11 @@
           {
             "type": "command",
             "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/session-start.sh"
+          },
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/branch-sync-check.sh",
+            "timeout": 30
           }
         ]
       }
@@ -18,6 +23,11 @@
           {
             "type": "command",
             "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/guard-commit.sh"
+          },
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/branch-sync-check.sh",
+            "timeout": 30
           }
         ]
       }

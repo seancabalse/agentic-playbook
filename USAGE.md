@@ -18,7 +18,7 @@ claude plugin install playbook@agentic-playbook --scope user
 Or straight from GitHub: `/plugin marketplace add seancabalse/agentic-playbook#all`, then `/plugin install playbook@agentic-playbook`.
 
 - Skills are `/playbook:<name>` (e.g. `/playbook:start-task ACME-42`). Agents and the session hook work by themselves.
-- Check what it adds: `claude plugin details playbook@agentic-playbook` shows 23 skills, 8 agents and 2 hooks, at about 1.1k tokens per session for the skill and agent descriptions.
+- Check what it adds: `claude plugin details playbook@agentic-playbook` shows 24 skills, 8 agents and 3 hooks, at about 1.1k tokens per session for the skill and agent descriptions.
 - Update: `git pull` in the clone (or `claude plugin update playbook@agentic-playbook` for a GitHub install), then start a new session.
 - **For a team repo**: commit `.claude/settings.json` from the playbook's `templates/claude-settings.json`. Everyone who trusts the repo is offered the plugin.
 
