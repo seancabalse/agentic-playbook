@@ -215,7 +215,7 @@ infer_stacks() {
 # project's repositories as separate clones. Asks which folders belong to the project, then writes the
 # workspace's AGENTS.md, CLAUDE.md, records and .gitignore, and sets up member repositories without an AGENTS.md.
 install_workspace() {
-  local ws="" a d name role n i s stacks tracker f line
+  local ws="" a d name role s stacks tracker f line
   local members="" sessions="" refs="" ignores="" setup=""
   while [ $# -gt 0 ]; do
     case "$1" in
@@ -248,21 +248,13 @@ install_workspace() {
       ask a "Is $name/ (a git repository) part of the project? (y/n)" y
       is_yes "$a" || continue
       ask role "  Its role (frontend, backend or other)?" "$(guess_role "$name")"
-      ask n "  How many agent sessions will work in it?" 1
-      case "$n" in [1-9]) ;; *) die "sessions for $name/: give a number from 1 to 9" ;; esac
       ask stacks "  Its stacks, comma-separated (see: playbook.sh list)?" "$(infer_stacks "$d")"
       if [ "$stacks" = none ]; then stacks=""; fi
       for s in $(echo "$stacks" | tr ',' ' '); do [ -f "$ROOT/stacks/$s.md" ] || die "unknown stack '$s' (see: playbook.sh list)"; done
 
-      line="\`$name-1\`"
-      sessions="$sessions"$'\n'"| \`$name-1\` | \`$name/\` | \`cd $name && claude -n $name-1\` |"
-      i=2
-      while [ "$i" -le "$n" ]; do
-        line="$line, \`$name-$i\`"
-        sessions="$sessions"$'\n'"| \`$name-$i\` | \`$name/\`, in its own worktree | \`cd $name && claude -n $name-$i -w $name-$i\` |"
-        i=$((i + 1))
-      done
-      members="$members"$'\n'"| \`$name/\` | $role | $line | ${stacks:-none} |"
+      # One new session for each task; the lead gives the full command, with the task id.
+      sessions="$sessions"$'\n'"| \`$name-<task id>\` | \`$name/\` | \`cd $name && claude -n $name-<task id>\` |"
+      members="$members"$'\n'"| \`$name/\` | $role | ${stacks:-none} |"
       ignores="$ignores/$name/"$'\n'
 
       if [ -e "$d/AGENTS.md" ]; then
@@ -284,7 +276,7 @@ install_workspace() {
   f="$ws/AGENTS.md"
   if [ -e "$f" ] && [ "$FORCE" -ne 1 ]; then f="$ws/AGENTS.playbook.md"; note "AGENTS.md exists: merge AGENTS.playbook.md into it (the workspace's rules win)"; fi
   { core_rules
-    M="| Repository | Role | Sessions | Stacks |"$'\n'"| -- | -- | -- | -- |$members" \
+    M="| Repository | Role | Stacks |"$'\n'"| -- | -- | -- |$members" \
     S="| Session | Where | Start it with |"$'\n'"| -- | -- | -- |"$'\n'"$sessions" \
     R="${refs:-none}" awk '
       $0 == "<!-- members -->" { print ENVIRON["M"]; next }
@@ -336,9 +328,10 @@ Next:
   1. Fill in "## 8. This workspace" in AGENTS.md: what it is, the PRD and the tracker project.
   2. In each member repository, run /playbook:bootstrap-project. It fills in that repository's section 8, adds
      .claude/worktrees/ to its .gitignore and sets up .worktreeinclude, which a second session's worktree needs.
-  3. Start each session in its own terminal or Code tab, with the commands under "Sessions" in AGENTS.md.
-     Run them all on the same side (all native, or all inside WSL): sessions can't message across.
-  4. Give the lead the work (a ticket or a description). It routes the pieces and keeps docs/workspace/ current.
+  3. Start the lead (claude -n lead) and give it an epic: /playbook:lead <epic or ticket>. It divides the epic
+     into tasks and gives you the command for a new session for each task. Run all sessions on the same
+     side (all native, or all inside WSL): sessions can't message across.
+  4. Close each task's session when the lead tells you. The lead keeps docs/workspace/ current.
   5. Commit AGENTS.md, CLAUDE.md, .gitignore, .claude/settings.json and docs/workspace/ on a branch.
 EOF
 }
