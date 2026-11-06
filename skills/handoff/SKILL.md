@@ -15,7 +15,7 @@ Rules: `${CLAUDE_PLUGIN_ROOT}/principles/15-agent-collaboration.md`. Shape: `${C
 ## write
 
 1. **Gather the facts**, not memories:
-   - `git status` and `git log` for the branch and commits; push if the owner wants the next session to start from it.
+   - `git status` and `git log` for the branch and commits; push if the owner wants the next session to start from it. Run `sync-branch` before you push, so the next session starts from current code.
    - The commands you ran and their results; screenshot paths; data checks.
    - Open findings with their scenarios.
    - Decisions made and who made them; questions still open for the owner.

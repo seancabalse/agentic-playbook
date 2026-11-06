@@ -39,5 +39,5 @@ How the owner and any AI agent work together on a project. These are opinionated
 
 19. **Report what actually happened.** If a test failed, show the output. If a step was skipped or couldn't be verified, say so. When something is done and verified, say it plainly.
 20. **Check yourself against the customer goal**: "Am I cutting corners, or drifting from what the customer needs?" If yes, stop and fix it, or raise it.
-21. **Confirm before anything hard to undo or outward-facing**: deleting data or branches, force-pushing, sending messages, publishing, changing hosted environments. One approval doesn't carry over to the next action.
+21. **Confirm before anything hard to undo or outward-facing**: deleting data or branches, force-pushing, sending messages, publishing, changing hosted environments. One approval doesn't carry over to the next action. One standing exception: `sync-branch` may update your own task branch, already on the remote, with `--force-with-lease --force-if-includes` after a rebase.
 22. **Keep the docs current with every PR** (see `12-documentation-knowledge.md`).
