@@ -40,7 +40,7 @@ Include data (migration, policies, tests, generated types), UI states (loading, 
 
 ## 4. Start
 
-- Move the ticket to the tracker's in-progress status (the mapping is in `AGENTS.md` → "Tracker"), and create a branch named from the ticket off the up-to-date default branch.
+- Move the ticket to the tracker's in-progress status (the mapping is in `AGENTS.md` → "Tracker"), and create a branch named from the ticket off the up-to-date default branch. If the ticket or the brief names a different base branch, or an existing branch to continue, use that instead.
 - Then build it with `implement` (or delegate to the `product-engineer` agent), smallest verifiable step first. When a step's check fails, fix it before moving on.
 
 Rules: `${CLAUDE_PLUGIN_ROOT}/principles/00-working-agreement.md`, `01-engineering.md`, `14-product-and-planning.md`.

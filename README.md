@@ -178,7 +178,7 @@ When one project spans several repositories, such as a frontend and a backend, p
 ```text
 shop/                  ← the workspace repository; the lead session runs here
 ├── AGENTS.md          ← sections 1–7 of the playbook, and section 8 for the workspace
-├── docs/workspace/    ← the lead's records: STATUS.md, HANDOFFS.md, DECISIONS.md
+├── docs/workspace/    ← the lead's records: epics/, STATUS.md, HANDOFFS.md, DECISIONS.md
 ├── backend/           ← its own git repository, ignored by the workspace
 ├── frontend/          ← its own git repository, ignored by the workspace
 └── refs/              ← reference material: read, never changed
@@ -195,16 +195,40 @@ It asks, one question at a time (Enter keeps the answer in brackets):
 1. Whether this folder is the workspace repository, and whether to run `git init` if it isn't one yet.
 2. The tracker.
 3. For each folder, in alphabetical order:
-   - **A git repository**: whether it's part of the project, its role (frontend, backend or other), how many agent sessions work in it, and its stacks (suggested from its manifests). If it has no `AGENTS.md`, whether to set it up now (the same as `playbook.sh project`).
+   - **A git repository**: whether it's part of the project, its role (frontend, backend or other), and its stacks (suggested from its manifests). If it has no `AGENTS.md`, whether to set it up now (the same as `playbook.sh project`).
    - **Any other folder**: whether it's reference material.
 
-It writes `AGENTS.md` (with the members, the sessions and their start commands, and the workspace rules), `CLAUDE.md`, `docs/workspace/`, `.claude/settings.json`, and `.gitignore` entries for the member repositories. Run it again at any time: it never replaces a file without `--force`, and never replaces the records.
+It writes `AGENTS.md` (with the members, the session names and start commands, and the workspace rules), `CLAUDE.md`, `docs/workspace/`, `.claude/settings.json`, and `.gitignore` entries for the member repositories. Run it again at any time: it never replaces a file without `--force`, and never replaces the records.
 
 Then:
 
 1. Fill in section 8 of the workspace's `AGENTS.md`, and run `/playbook:bootstrap-project` in each member repository.
-2. Start each session in its own terminal or Code tab, with the names from the "Sessions" table, such as `claude -n lead` at the root and `cd backend && claude -n backend-1`. A second session in a repository gets its own worktree: `claude -n backend-2 -w backend-2`.
-3. Give the lead the work. It plans across the repositories, agrees the contracts between them, sends each piece to its session, checks each handoff, runs the tests that need more than one repository, and keeps the records (`/playbook:lead`).
+2. Start the lead at the root: `claude -n lead`.
+3. Give the lead an epic (`/playbook:lead KEY-10`, or a description). It asks the product questions, and where to keep the task briefs: in the tracker as sub-tasks of each story, or as Markdown files in `docs/workspace/tasks/`. It divides the epic into **stories** (changes a user can see, which can span repositories; it reuses the stories already in the tracker) and each story into **tasks** (one PR in one repository). It agrees the contracts between the repositories and writes a complete brief for each task.
+4. The lead works one story at a time where it can, and tests each story across the repositories as soon as its tasks are done, so you can review it early. For each task, the lead gives you the command for a **new** session, such as `cd backend && claude -n backend-KEY-13 "/playbook:start-task KEY-13"`. When the lead has checked the task's handoff, it tells you to close that session. When two sessions work in one repository at the same time, the second one gets its own worktree (`-w`).
+
+### Why a new session for each task
+
+A long session sends its whole conversation again with each message, so it uses more tokens as it grows. A session for one task starts with only the rules and that task's brief, and closes when the task is done. Nothing is lost, because the context is in files, not in the sessions:
+
+- the epic file (`docs/workspace/epics/<epic>.md`): the stories and tasks, their order, the contracts and the notes later tasks need;
+- each task's brief: the epic in one sentence, its story and the story's acceptance criteria, the task's acceptance criteria, the full contracts and what earlier tasks delivered;
+- `STATUS.md`, `HANDOFFS.md` and `DECISIONS.md`.
+
+The lead can restart too, best when no member session is working: close its session, start a new one with `claude -n lead` and run `/playbook:lead KEY-10`. It continues from those files. Give the new session the name `lead`, because the members send their handoffs to that name.
+
+A task that needs another session later, for review comments or a failed check, keeps its sub-task and its branch. The lead adds the last handoff to the brief, and the new session starts in the branch's existing worktree.
+
+### Moving sessions that are already running to this flow
+
+A plugin update doesn't change sessions that are already running: each keeps the version it started with. Switch when it suits you:
+
+1. Let tasks that are almost done finish as they are.
+2. In each other member session, ask it to stop at a clean point, commit and push its branch, and send its handoff to the lead with its worktree path.
+3. Ask the old lead to record every handoff and to put each branch, commit and worktree in `STATUS.md`. Then close it.
+4. Update the plugin, start a new lead (`claude -n lead`) and tell it: "`/playbook:lead KEY-10`. This epic is already in progress. Don't plan it again. Build the epic file from `STATUS.md`, `HANDOFFS.md` and the pushed branches. Make each existing branch one task. Add the remaining work as new tasks under its stories."
+5. When the lead gives a task a new session, close the old member session of that task first. Then start the new one. For a task that continues a branch, the new session starts in the branch's existing worktree, without `-w`.
+
 
 Members send their handoffs to the lead, and the lead routes the next step. The sessions talk through Claude Code's [cross-session messages](https://code.claude.com/docs/en/cross-session-messaging.md), which need no setup. Run them all on the same machine; on Windows, all natively or all inside WSL, because the two can't message each other. The roles and rules are in `principles/15-agent-collaboration.md`, "Across repositories".
 
@@ -246,7 +270,7 @@ Sections 1–4 of `AGENTS.md` stay the same in every project. Sections 5–7 are
 | `verify-feature` | Walk the acceptance criteria in the running product, including error and edge states. |
 | `capture-screenshots` | Capture states × sizes × settings as evidence for a PR. |
 | `handoff` | Write or resume a handoff between agents, sessions or people. |
-| `lead` | Lead a workspace of several repositories: split the work, agree the contracts, route handoffs between the sessions, and keep the records. |
+| `lead` | Lead a workspace of several repositories: divide an epic into stories and tasks, agree the contracts, give each task a new session with a complete brief, route the handoffs, and keep the records. |
 | `docs-upkeep` | Keep `AGENTS.md`, the decision log, the architecture doc and the runbook current. |
 | `write-adr`, `log-decision` | Record hard-to-reverse choices and everyday decisions. |
 | `architecture-review`, `design-review`, `a11y-audit` | Structural, UX and accessibility reviews. |
