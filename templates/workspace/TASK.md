@@ -38,4 +38,4 @@ The lead does these checks again when you finish:
 
 ## When you finish
 
-When you complete the task, or when you cannot continue, write your handoff with the playbook template. Send it to the lead session (`lead`) with `SendMessage`. Also put it on the ticket, if this task has a ticket in the tracker of your repository. Then stop. The owner closes this session.
+When you complete the task, or when you cannot continue, write your handoff with the playbook template. Send it to the lead session (`lead`) with `SendMessage`. Also put it on the ticket, if this task has a ticket in the tracker of your repository. Then stop. The owner or the lead closes this session.

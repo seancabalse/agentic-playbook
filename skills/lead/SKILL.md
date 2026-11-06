@@ -1,6 +1,6 @@
 ---
 name: lead
-description: "Lead a workspace of several repositories: divide an epic into stories and tasks, agree the contracts between the repositories, give each task a new member session with a complete brief, route the handoffs, and keep the progress, cross-repository tests and decisions in docs/workspace/. Use in a session started at a workspace root."
+description: "Lead a workspace of several repositories: divide an epic into stories and tasks, agree the contracts between the repositories, give each task a new member session with a complete brief (or start it in the background, with the CLI), route the handoffs, and keep the progress, cross-repository tests and decisions in docs/workspace/. Use in a session started at a workspace root."
 argument-hint: "[epic or ticket id, or request]"
 ---
 
@@ -52,7 +52,7 @@ Some machines block reads outside the working directories of a session (`permiss
    - The entries in `docs/workspace/DECISIONS.md` that apply to the request.
 2. Use `ListAgents` to find the sessions that run now. Compare them with the tasks that are `in progress` in `STATUS.md`.
 3. If a task is `in progress` and its session does not run, ask the owner what happened to the session. If the session closed, continue the task (section 3, "Continue a task").
-4. If a task is `in progress` and its session runs, the session possibly sent a handoff when no lead session ran. Send it this message: "The lead session started again. If you sent a handoff, send it again." Also read the ticket of the task.
+4. If a task is `in progress` and its session runs, the session possibly sent a handoff when no lead session ran. Send it this message: "The lead session started again. If you sent a handoff, send it again." Ask for a notice when it is idle (`notify_when_idle`). Also read the ticket of the task.
 5. For each member repository, read the state. Do not change the repository:
    - `git -C <repo> status --short --branch`
    - `git -C <repo> log --oneline -5`
@@ -67,18 +67,21 @@ Some machines block reads outside the working directories of a session (`permiss
    - **The tracker in `AGENTS.md`** (recommended when there is one): one sub-task of the story for each task, with the brief in its description. If the tracker has no sub-tasks, use a child issue of the story.
    - **A different tracker** that the owner names. The member sessions cannot read it. Thus, you send each brief in a message, and you put each handoff on the ticket.
    - **Markdown files**: `docs/workspace/tasks/`, or a different folder in the workspace repository that the owner names. You send each brief in a message.
-5. Ask the owner the product questions and the question about the briefs in one message. Then stop until the owner answers.
-6. Get an id for the epic. Use its ticket id. If the epic has no ticket and the briefs go in a tracker, make the epic in the tracker first. If the briefs are Markdown files, use a short id, for example `E1`.
-7. Divide the epic into stories. If the epic has stories in the tracker or in the source file, use them. Do not make a copy of a story. Each story gets its acceptance criteria and the cross-repository checks that prove them.
-8. Divide each story into tasks. Each task is one PR in one repository. Make each task small enough for one session. Give each task its acceptance criteria and its checks.
-9. Make the tasks independent. Two sessions must not change the same files at the same time.
-10. **Write the contracts first.** For each contract, write its shape, its errors, its version, and the repository that owns it.
-11. Record each contract with `log-decision` in `docs/workspace/DECISIONS.md`.
-12. If a contract is difficult to change later, the member that owns it writes an ADR (`write-adr`) in its repository. The owner must accept the ADR before a session builds on the contract.
-13. Put the stories and the tasks in sequence. Finish one story before you start many others. Then the owner can examine each story early. Find the tasks that can run at the same time, and the tasks that must wait. For example, the frontend builds against the contract with a stub while the backend builds the endpoint.
-14. If the briefs go in a tracker, make each new story as a child of the epic. Make each task as a sub-task of its story. Write only a summary in the sub-task now. Write the full brief when the task starts (section 3), because earlier tasks add data to it.
-15. Write the epic file `docs/workspace/epics/<epic id>.md` from the template `EPIC.md`. Write in it the place of the briefs that the owner chose.
-16. Add each task to `STATUS.md`, with the state `planned` and its checks. Add the cross-repository checks of each story.
+5. Ask the owner who starts the member sessions. Give these options:
+   - **The owner** (the default): you give the owner a start command for each task. This works in the desktop app and in a terminal.
+   - **You, in the background**: only if you run in the Claude Code CLI, and `claude --version` works in your shell. The owner gives the maximum number of member sessions that run at the same time. The owner must trust each member repository folder once: the owner opens one normal session in that folder and accepts the trust question. A background session cannot show that question.
+6. Ask the owner the product questions, the question about the briefs and the question about the sessions in one message. Then stop until the owner answers.
+7. Get an id for the epic. Use its ticket id. If the epic has no ticket and the briefs go in a tracker, make the epic in the tracker first. If the briefs are Markdown files, use a short id, for example `E1`.
+8. Divide the epic into stories. If the epic has stories in the tracker or in the source file, use them. Do not make a copy of a story. Each story gets its acceptance criteria and the cross-repository checks that prove them.
+9. Divide each story into tasks. Each task is one PR in one repository. Make each task small enough for one session. Give each task its acceptance criteria and its checks.
+10. Make the tasks independent. Two sessions must not change the same files at the same time.
+11. **Write the contracts first.** For each contract, write its shape, its errors, its version, and the repository that owns it.
+12. Record each contract with `log-decision` in `docs/workspace/DECISIONS.md`.
+13. If a contract is difficult to change later, the member that owns it writes an ADR (`write-adr`) in its repository. The owner must accept the ADR before a session builds on the contract.
+14. Put the stories and the tasks in sequence. Finish one story before you start many others. Then the owner can examine each story early. Find the tasks that can run at the same time, and the tasks that must wait. For example, the frontend builds against the contract with a stub while the backend builds the endpoint.
+15. If the briefs go in a tracker, make each new story as a child of the epic. Make each task as a sub-task of its story. Write only a summary in the sub-task now. Write the full brief when the task starts (section 3), because earlier tasks add data to it.
+16. Write the epic file `docs/workspace/epics/<epic id>.md` from the template `EPIC.md`. Write in it the place of the briefs and who starts the sessions, as the owner chose.
+17. Add each task to `STATUS.md`, with the state `planned` and its checks. Add the cross-repository checks of each story.
 
 ## 3. Start a task
 
@@ -97,17 +100,36 @@ Do these steps for each task that can start now.
    - The checks that you will do again.
 
    Do not put secrets or private data in a brief. Give the location of a secret, not its value.
-2. **Give the owner the start command** for a new session. The name of the session is `<repository>-<task id>`. Example: `backend-KEY-13`.
+2. **Give the owner the start command** for a new session. If the owner chose that you start the sessions, do "Start the session yourself" (below) instead. The name of the session is `<repository>-<task id>`. Example: `backend-KEY-13`.
    - If the brief is in the tracker of the member repository (its `AGENTS.md`), the session reads the brief from the ticket. Command: `cd backend && claude -n backend-KEY-13 "/playbook:start-task KEY-13"`. In the desktop app, the owner opens a new session in `backend/`. Then the owner uses `/rename backend-KEY-13`. Then the owner types `/playbook:start-task KEY-13`.
    - In all other cases, you send the brief in a message. Command: `cd backend && claude -n backend-E1-S1-T1`. In the desktop app, the owner opens a new session in `backend/`. Then the owner uses `/rename backend-E1-S1-T1`.
    - If a different session works in the same repository at the same time, add `-w <session name>` to the command. The new session then works in its own worktree.
 3. **Send the brief in a message**, if the session does not read it from the ticket:
-   1. Stop until the owner tells you that the session runs.
+   1. Stop until the owner tells you that the session runs. If you started the session yourself, do not stop.
    2. Use `ListAgents` to find the session.
    3. Send the full text of the brief to the session with `SendMessage`.
-   4. If `ListAgents` does not show the session, tell the owner to paste the text of the brief into the session.
+   4. If `ListAgents` does not show the session, and you started it, run `claude agents` to see that it runs. Then use `ListAgents` again, one time.
+   5. If `ListAgents` still does not show the session, tell the owner to paste the text of the brief into the session. For a session that you started, the owner opens it first: `claude attach <id>`.
 4. Record the task in `HANDOFFS.md` with a **Routed** line.
 5. In `STATUS.md` and in the epic file, set the state of the task to `in progress`, with the name of its session.
+
+### Start the session yourself
+
+Do this only if the owner chose it (section 2).
+
+1. Count the member sessions that run now (`ListAgents`). If the number is at the maximum that the owner gave, wait until a task is complete.
+2. Run the start command from section 3 step 2, with `--bg` and `--permission-mode auto` added. Run it in parentheses, from the folder of the session. The parentheses keep your own shell in the workspace root. Without them, your next commands run in the member repository. Examples:
+   - Brief on the ticket: `(cd backend && claude --bg -n backend-KEY-13 --permission-mode auto "/playbook:start-task KEY-13")`
+   - Brief in a message: `(cd backend && claude --bg -n backend-E1-S1-T1 --permission-mode auto "You are the member session for task E1-S1-T1. Wait for the brief from the lead session.")` Then send the brief (section 3, step 3).
+   - Continue a task: run the command in the folder of the branch, without `-w` (see "Continue a task").
+
+   Do not use `--permission-mode bypassPermissions`. Do not use `-p`.
+3. The command shows a short id, for example `claude stop 5609a6cc`. Write the id in `STATUS.md`, next to the name of the session. `claude stop` accepts the id, not the name.
+4. Ask for a notice when the session is idle (`SendMessage` with `notify_when_idle`).
+5. A background session cannot show a question. If the session is idle and no handoff came, or if a handoff is late, read its output one time: `claude logs <id>`.
+   - If it waits for a permission or for the trust of its folder, tell the owner to open it: `claude attach <id>`.
+   - If it asks the owner a question, send the question to the owner. Then send the answer of the owner to the session. Do not answer a product question yourself.
+6. When the task is complete, stop the session: `claude stop <id>`. Do not use `claude rm`. It deletes the conversation.
 
 ### Continue a task
 
@@ -115,9 +137,10 @@ Sometimes a task that started needs a new session. Examples: its session closed 
 
 1. Do not make a new sub-task. Do not make a new branch.
 2. Change the existing brief. Add the last handoff of the task and the work that remains. Write that the member continues on the existing branch.
-3. Make sure that the old session of the task is closed. Two sessions must not work in one checkout.
+3. Make sure that the old session of the task is closed. If you started it, stop it (`claude stop <id>`). Two sessions must not work in one checkout.
 4. Find the worktree of the branch: `git -C <repo> worktree list`. Git lets one branch be in only one worktree. If the branch is in a worktree or in the main checkout, the new session starts in that folder. Do not add `-w`. Example: `cd backend/.claude/worktrees/backend-2 && claude -n backend-KEY-13 "/playbook:start-task KEY-13"`.
-5. Then do steps 3 to 5 above.
+5. If the owner chose that you start the sessions, do "Start the session yourself" in that folder. Example: `(cd backend/.claude/worktrees/backend-2 && claude --bg -n backend-KEY-13 --permission-mode auto "/playbook:start-task KEY-13")`. If not, give the owner the command from step 4.
+6. Then do steps 3 to 5 of section 3.
 
 ## 4. Receive a handoff
 
@@ -139,7 +162,7 @@ When a handoff comes:
    - The epic file: the state of the task. Under "Notes for the next task", write the facts that later tasks need. Example: "The endpoint is on branch `KEY-13-save-cart` at abc1234."
 5. **Decide the next step**, and record it with a **Routed** line:
    - If the task needs fixes, send them to the same session.
-   - If the task is complete, tell the owner to close its session.
+   - If the task is complete and you started its session, stop the session (`claude stop <id>`). If you did not start it, tell the owner to close it.
    - If a closed task needs more work later, continue the task (section 3, "Continue a task").
    - Start the tasks that can start now (section 3).
    - Send questions, ADRs and reviews to the owner.
@@ -174,5 +197,5 @@ Your session also collects context. When you complete a step and the records are
 1. Make sure that each story and each task is `done` in `STATUS.md` and in the epic file, with its PRs.
 2. Make sure that the cross-repository tests passed, with evidence.
 3. Put a summary handoff on each story ticket and on the epic ticket, or at the top of the epic file if there is no ticket: the changes in each repository, the PRs, the evidence, the decisions and the work that remains.
-4. Make sure that each member session stopped the processes and worktrees that it started, or wrote them under "Still running". Tell the owner to close the member sessions that are still open.
+4. Make sure that each member session stopped the processes and worktrees that it started, or wrote them under "Still running". Stop each member session that you started (`claude stop <id>`). Tell the owner to close the other member sessions that are still open.
 5. **Stop.** The owner examines and merges the PR of each repository. Only the owner ships (`/ship-pr`) and merges.
