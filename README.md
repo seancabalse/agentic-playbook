@@ -15,6 +15,7 @@ An engineering playbook for AI coding agents. It gives Claude Code, Codex, Curso
 - [Install from GitHub](#install-from-github)
 - [Set up a project](#set-up-a-project)
 - [A workspace with several repositories](#a-workspace-with-several-repositories)
+- [Keeping long-running branches current](#keeping-long-running-branches-current)
 - [Using it with other tools](#using-it-with-other-tools)
 - [Customising](#customising)
 - [Skills and agents](#skills-and-agents)
@@ -33,9 +34,9 @@ An engineering playbook for AI coding agents. It gives Claude Code, Codex, Curso
 | `templates/` | ADR, decision log, architecture, runbook, PRD, requirements brief, ticket, PR description, handoff, threat model, release checklist, audit report, testing templates, and Claude Code settings (`claude-settings.json`, `worktreeinclude`). |
 | `stacks/` | Stack-specific rules appended to a project's `AGENTS.md`. Which stacks exist depends on the branch. |
 | `trackers/` | How agents use the issue tracker: Linear, Jira (with Confluence), or GitHub Issues and Projects. |
-| `skills/` | 23 skills: repeatable procedures such as `start-task`, `implement`, `verify-feature`, `security-audit` and `ship-pr`. |
+| `skills/` | 24 skills: repeatable procedures such as `start-task`, `implement`, `verify-feature`, `security-audit` and `ship-pr`. |
 | `agents/` | 8 subagents: product owner, product engineer, architect, QA verifier, code reviewer, security auditor, design reviewer and docs keeper. |
-| `hooks/` | Claude Code hooks: one tells agents where the playbook and the project's overrides are, and in a workspace who the lead is; one blocks AI attribution and secrets in commits and PRs. |
+| `hooks/` | Claude Code hooks: one tells agents where the playbook and the project's overrides are, and in a workspace who the lead is; one blocks AI attribution and secrets in commits and PRs; one warns when the branch falls behind the team branch, or a rebase onto it would conflict. |
 | `scripts/playbook.sh` | The installer. |
 | `USAGE.md` | Worked examples. |
 
@@ -279,6 +280,20 @@ A plugin update doesn't change sessions that are already running: each keeps the
 
 Members send their handoffs to the lead, and the lead routes the next step. The sessions talk through Claude Code's [cross-session messages](https://code.claude.com/docs/en/cross-session-messaging.md), which need no setup. Run them all on the same machine; on Windows, all natively or all inside WSL, because the two can't message each other. The roles and rules are in `principles/15-agent-collaboration.md`, "Across repositories".
 
+## Keeping long-running branches current
+
+On a busy team branch (`main` or `dev`, with many commits a day), a branch that an agent works on for hours falls behind, and the conflicts grow while it works. The playbook catches this early:
+
+- **A hook warns the session** (it never changes the branch). At session start, it says when the branch is behind the team branch. Before each `git commit` and `git push`, it warns only when a rebase would conflict (and names the files), or when the branch is 50 or more commits behind. It predicts conflicts in memory with `git merge-tree`, fetches at most every 2 minutes in the background, waits at most 5 seconds for it, and never waits for a password. A branch stacked on another task's unmerged branch is compared with that branch instead.
+- **The `sync-branch` skill brings the branch up to date**: fetch, predict conflicts, rebase (with `rerere`, so a resolution is reused next time, which the agent re-checks), resolve the conflicts that are clearly within the task, run the full checks, and update a branch that's already pushed with `--force-with-lease --force-if-includes`. It syncs only committed work (no `--autostash`, because worktrees share one stash), never pushes a new branch, and rebases with `--onto` once a stacked base has been merged. A conflict that needs a decision about someone else's change makes it abort the rebase, leave the branch as it was, and ask you (or the lead) with both sides and a recommendation.
+- **Skills run it at the right points**: `start-task` on an existing branch, `handoff` before pushing, and `ship-pr` before the PR. In a workspace, the lead also checks each handed-off branch against the team branch and against the other branches in progress in the same repository, and tells both sessions when they will conflict.
+
+Set the team branch once per clone (all its worktrees share it). Without it, the hook and the skill use the remote's default branch, then `main` or `master`. Conflict prediction needs git 2.38 or later (check with `git --version`, notably on older WSL distributions):
+
+```bash
+git config playbook.integrationBranch dev
+```
+
 ## Using it with other tools
 
 | Tool | Always-on rules | Procedures |
@@ -313,6 +328,7 @@ Sections 1–4 of `AGENTS.md` stay the same in every project. Sections 5–7 are
 | `start-task` | Gather context, state assumptions, ask product questions, and plan with a check per step. |
 | `implement` | Build in small, test-first steps with per-layer checklists and a customer-journey check. |
 | `fix-bug` | Reproduce, write a failing test, find the root cause, fix, and record the lesson. |
+| `sync-branch` | Keep a task branch current with the team branch (main or dev): predict conflicts, rebase, resolve the clear ones or stop, run the checks, push with `--force-with-lease`. |
 | `reproduce-in-worktree` | Reproduce a bug or review finding in an isolated git worktree and try the fix there before a person is involved. |
 | `verify-feature` | Walk the acceptance criteria in the running product, including error and edge states. |
 | `capture-screenshots` | Capture states × sizes × settings as evidence for a PR. |
@@ -363,6 +379,8 @@ The plugin's hooks enforce two rules from the working agreement, so they don't d
 | Secrets in commits | Staged `.env` and key files, private keys, and AWS, GitHub, Slack, Stripe, Anthropic, OpenAI and Supabase secret tokens | List allowed paths in `.playbook/local/secret-scan-allow` |
 
 A blocked command shows the file, the line and the kind of secret, never its value. The hooks cost no context tokens.
+
+A third hook only warns: when a branch falls behind the team branch, or a rebase onto it would conflict (see [Keeping long-running branches current](#keeping-long-running-branches-current)). It adds one line to the context, and only when it warns.
 
 ## Keeping up to date
 

@@ -35,7 +35,7 @@ Run `docs-upkeep`: `AGENTS.md` rules, Decision Log, Architecture, runbook traps,
 
 ## 5. PR
 
-- Push the branch, then open the PR against the default branch (or the stacked base, if its PR is still open; check it isn't already merged).
+- Bring the branch up to date with `sync-branch` (rebase onto the team branch, checks, `--force-with-lease`). Then push the branch, and open the PR against the default branch (or the stacked base, if its PR is still open; check it isn't already merged).
 - Fill the body from `${CLAUDE_PLUGIN_ROOT}/templates/pr-description.md`:
   - **Verified**: actual results.
   - **Not verified**: honestly stated.
