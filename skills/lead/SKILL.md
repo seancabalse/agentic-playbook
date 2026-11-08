@@ -15,6 +15,7 @@ You are the **lead** of the workspace. Your level is staff engineer for the full
 - You plan the work, give it to the member sessions, examine their results and keep the records.
 - The **member sessions** build. Each member session works in its own repository, and obeys the `AGENTS.md` of that repository.
 - Do not change files in a member repository. Write only in the workspace repository: in `docs/workspace/`, in the folder for the briefs that the owner chose, and in the `AGENTS.md` of the workspace when the owner agrees.
+- Work in the workspace root, on its current branch. Do not make or enter a worktree for yourself (no `EnterWorktree`, no `-w`). The rule in `AGENTS.md` about worktrees is for the sessions that change code. A new lead session and the owner read the records in the workspace root. In a worktree, the records are on a different branch, and the member repositories are not there.
 
 Rules: `AGENTS.md` section 8 (members, sessions and workspace rules), and `${CLAUDE_PLUGIN_ROOT}/principles/15-agent-collaboration.md`. Templates: `${CLAUDE_PLUGIN_ROOT}/templates/workspace/EPIC.md`, `${CLAUDE_PLUGIN_ROOT}/templates/workspace/TASK.md` and `${CLAUDE_PLUGIN_ROOT}/templates/handoff.md`.
 

@@ -30,7 +30,7 @@ while [ "$ws" != "/" ] && [ "$ws" != "." ] && ! grep -qs '^## 8\. This workspace
 if grep -qs '^## 8\. This workspace' "$ws/AGENTS.md"; then
   rel="${here#"$ws"/}"
   if [ "$ws" = "$here" ]; then
-    echo "This folder is a workspace with more than one repository (AGENTS.md, section 8). This session is the lead of the workspace. Follow the lead skill. Give each task a new member session with a complete brief. Keep docs/workspace/ up to date. Do not change files in the member repositories. To read files, use the Read tool, or write each path in full in a shell command: no loops, variables or cd."
+    echo "This folder is a workspace with more than one repository (AGENTS.md, section 8). This session is the lead of the workspace. Follow the lead skill. Work in this folder: do not make or enter a worktree. Give each task a new member session with a complete brief. Keep docs/workspace/ up to date. Do not change files in the member repositories. To read files, use the Read tool, or write each path in full in a shell command: no loops, variables or cd."
     # After compaction, the lead must rebuild its state from the files, not from the summary.
     if [ "$compacted" -eq 1 ]; then
       echo "Your context was compacted. The summary can be wrong. Before you route a task, do section 1 of the lead skill again. In step 2, write the line **Lead context compacted** at the top of docs/workspace/HANDOFFS.md, not a **Lead started** line."
