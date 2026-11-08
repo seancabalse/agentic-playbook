@@ -96,6 +96,7 @@ The full check suite passes; you saw the change work in the real product, with e
 
 - **What it is**: <one sentence: who it's for and what it does>. PRD: <link>.
 - **Tracker**: <Linear / Jira / GitHub Issues / …>, project <name or link>. Access, ids, status mapping and where the docs live are in the "Tracker" section below (installed with `--tracker`; for another tracker, copy one from `.playbook/trackers/`). Living docs: Decision Log <link>, Architecture <link>, Runbook <link>, PRD <link>.
+- **Delivery**: <PR (the default)> or <local merge: no PR; the owner squash-merges each branch locally>. `ship-pr` reads this line.
 - **Stack** (see `docs/adr/0001-stack.md`): <framework + exact major version>, <backend>, <database>, <hosting>. Docs to check before using an API: <versioned docs URLs>.
 - **Tenant unit**: <workspace / account / space>. Every content row has `<tenant>_id`.
 

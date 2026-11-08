@@ -15,6 +15,10 @@ These checks use more than one repository. Examples: contract tests, end-to-end 
 | Story | Check (command or scenario) | Repositories | Last run (UTC) | Result |
 | -- | -- | -- | -- | -- |
 
-## Questions for the owner
+## Open decisions
 
-- <question, with options and a recommendation>
+The questions that only the owner can answer. A decision is closed only when the owner answers. Then the lead records it in `DECISIONS.md`.
+
+| Id | Question | Options (recommended first) | Asked (UTC) | Answer, by whom, when |
+| -- | -- | -- | -- | -- |
+| <Q1> | <Accept the stack ADR of backend/?> | <accept · change> | <YYYY-MM-DD HH:MM> | <open, or: "accept", owner, YYYY-MM-DD HH:MM> |

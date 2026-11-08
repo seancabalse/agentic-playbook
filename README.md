@@ -230,6 +230,13 @@ When the context of the lead becomes large, its work becomes worse, and the lead
 
 A task that needs another session later, for review comments or a failed check, keeps its sub-task and its branch. The lead adds the last handoff to the brief, and the new session starts in the branch's existing worktree.
 
+### Scout tasks, effort levels, open decisions and delivery
+
+- **Scout tasks.** If an unknown stops the plan of a story, the lead makes a scout task first. Examples: an area of the code that nobody understands, a risk, or a choice between approaches. A scout session investigates and sends a report, with no PR. The lead saves it in `docs/workspace/scouts/`. A report can recommend work, but only you give approval. The lead puts the findings in the briefs of the build tasks, so that they do not investigate again.
+- **Effort levels.** The lead gives each task an effort level: `low` for a small task with a clear path, `medium` or `high` for a usual task, `xhigh` for an unclear design or a scout task. It never uses `max` unless you ask. The start command includes `--effort <level>`. In the desktop app, type `/effort <level>` in the new session.
+- **Open decisions.** The lead writes each question for you in `STATUS.md`, "Open decisions", with the options and the recommended option first. A decision closes only when you answer. Then the lead records it in `DECISIONS.md`. The lead asks only decisions, and writes progress in `STATUS.md`. When you come back, or when a new lead starts, it asks the open decisions one at a time, starting with the one that stops the most work.
+- **Delivery.** Section 8 of `AGENTS.md` has a **Delivery** line: PR (the default), or local merge. With a local merge, `ship-pr` opens no PR. It gives you the commands to squash-merge the branch locally.
+
 ### Letting the lead start the sessions (CLI)
 
 By default you start each task's session with the command the lead gives you. If the lead runs in the Claude Code CLI, it can start and stop them itself, in the background. It asks you when it plans the epic, and you set the maximum number of member sessions at a time.
@@ -243,8 +250,10 @@ Before you say yes:
 The lead starts each one like this (the parentheses keep the lead's own shell at the workspace root), and records the short id it prints:
 
 ```bash
-(cd backend && claude --bg -n backend-KEY-13 --permission-mode auto "/playbook:start-task KEY-13")
+(cd backend && claude --bg -n backend-KEY-13 --permission-mode auto --effort high "/playbook:start-task KEY-13")
 ```
+
+You can also run the lead itself in the background. Claude Code lets a background session write only in a worktree. The lead must write its records at the workspace root, so the setup writes `"worktree": { "bgIsolation": "none" }` in the workspace's `.claude/settings.json`. This changes only the workspace repository, which holds only the records. The member repositories keep the guard. The lead never makes or enters a worktree for itself.
 
 To watch or step in, use `claude agents` (the list), `claude attach <id>` and `claude logs <id>`. When a task is done, the lead runs `claude stop <id>`, which keeps the conversation; it never runs `claude rm`. If a session stops at a permission or trust question, the lead tells you to open it with `claude attach <id>`. If a member asks a product question, the lead passes it to you and sends your answer back.
 

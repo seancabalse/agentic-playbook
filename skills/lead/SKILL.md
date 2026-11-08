@@ -23,6 +23,7 @@ Words in this skill:
 - **Epic**: a large request. It contains stories. If the request is one story, the epic contains only that story.
 - **Story**: a change that a user can see and use. It has the acceptance criteria that the owner accepts. A story can need changes in more than one repository.
 - **Task**: one part of a story. A task is one PR in one repository. One new member session does one task. A story can have many tasks.
+- **Scout task**: a task that investigates a question and writes a report. It makes no PR. A report can recommend work, but it does not give approval for the work. Only the owner gives approval.
 - **Brief**: the complete instructions for one task. The member session starts from the brief only.
 - **Contract**: the agreed interface between two repositories, for example an endpoint, a payload, an event, a shared type or an error code.
 - **Route**: give a task or a next step to a session, and record that you gave it.
@@ -72,6 +73,7 @@ Some machines block reads outside the working directories of a session (`permiss
    - `git -C <repo> log --oneline -5`
    - `git -C <repo> worktree list`
 7. If the epic file has a "Lead checkpoint", do its next steps. If the checkpoint and the state that you found are different, use the state.
+8. If `STATUS.md` has open decisions, ask the owner about them (section 6, "Open decisions").
 
 ## 2. Plan the epic (gate: owner)
 
@@ -85,13 +87,21 @@ Some machines block reads outside the working directories of a session (`permiss
 5. Ask the owner who starts the member sessions. Give these options:
    - **The owner** (the default): you give the owner a start command for each task. This works in the desktop app and in a terminal.
    - **You, in the background**: only if you run in the Claude Code CLI, and `claude --version` works in your shell. The owner gives the maximum number of member sessions that run at the same time. The owner must trust each member repository folder once: the owner opens one normal session in that folder and accepts the trust question. A background session cannot show that question.
-6. Ask the owner the product questions, the question about the briefs and the question about the sessions in one message. Then stop until the owner answers.
+6. Ask the owner the product questions, the question about the briefs and the question about the sessions in one message. Record each question as an open decision (section 6). Then stop until the owner answers.
 7. Get an id for the epic. Use its ticket id. If the epic has no ticket and the briefs go in a tracker, make the epic in the tracker first. If the briefs are Markdown files, use a short id, for example `E1`.
 8. Divide the epic into stories. If the epic has stories in the tracker or in the source file, use them. Do not make a copy of a story. Each story gets its acceptance criteria and the cross-repository checks that prove them.
 9. Divide each story into tasks. Each task is one PR in one repository. Give each task its acceptance criteria and its checks. Make each task small enough for one session. Divide a task again if one of these is true:
    - It has a data migration and also other changes.
    - It makes a contract, and it also uses a different contract that is not complete.
    - You expect more than approximately 400 changed lines. Do not count tests and generated files.
+
+   If an unknown stops the plan of a story, make a scout task first. Examples of unknowns: an area of the code that you do not understand, a risk, or a choice between approaches. The build tasks that need the answer wait for the report.
+
+   Give each task an effort level for its session:
+   - `low`: a small task with a clear path.
+   - `medium` or `high`: a usual task.
+   - `xhigh`: a task with an unclear design, and each scout task.
+   - Do not use `max`, unless the owner tells you to.
 10. Make the tasks independent. Two sessions must not change the same files at the same time.
 11. **Write the contracts first.** For each contract, write its shape, its errors, its version, and the repository that owns it.
 12. Record each contract with `log-decision` in `docs/workspace/DECISIONS.md`.
@@ -119,8 +129,9 @@ Do these steps for each task that can start now.
 
    Do not put secrets or private data in a brief. Give the location of a secret, not its value.
 2. **Give the owner the start command** for a new session. If the owner chose that you start the sessions, do "Start the session yourself" (below) instead. The name of the session is `<repository>-<task id>`. Example: `backend-KEY-13`.
-   - If the brief is in the tracker of the member repository (its `AGENTS.md`), the session reads the brief from the ticket. Command: `cd backend && claude -n backend-KEY-13 "/playbook:start-task KEY-13"`. In the desktop app, the owner opens a new session in `backend/`. Then the owner uses `/rename backend-KEY-13`. Then the owner types `/playbook:start-task KEY-13`.
-   - In all other cases, you send the brief in a message. Command: `cd backend && claude -n backend-E1-S1-T1`. In the desktop app, the owner opens a new session in `backend/`. Then the owner uses `/rename backend-E1-S1-T1`.
+   - Add the effort level of the task to the command: `--effort <level>`. In the desktop app, the owner types `/effort <level>` in the new session.
+   - If the brief is in the tracker of the member repository (its `AGENTS.md`), the session reads the brief from the ticket. Command: `cd backend && claude -n backend-KEY-13 --effort high "/playbook:start-task KEY-13"`. In the desktop app, the owner opens a new session in `backend/`. Then the owner uses `/rename backend-KEY-13`. Then the owner types `/playbook:start-task KEY-13`.
+   - In all other cases, you send the brief in a message. Command: `cd backend && claude -n backend-E1-S1-T1 --effort high`. In the desktop app, the owner opens a new session in `backend/`. Then the owner uses `/rename backend-E1-S1-T1`.
    - If a different session works in the same repository at the same time, add `-w <session name>` to the command. The new session then works in its own worktree.
 3. **Send the brief in a message**, if the session does not read it from the ticket:
    1. Stop until the owner tells you that the session runs. If you started the session yourself, do not stop.
@@ -137,8 +148,8 @@ Do this only if the owner chose it (section 2).
 
 1. Count the member sessions that run now (`ListAgents`). If the number is at the maximum that the owner gave, wait until a task is complete.
 2. Run the start command from section 3 step 2, with `--bg` and `--permission-mode auto` added. Run it in parentheses, from the folder of the session. The parentheses keep your own shell in the workspace root. Without them, your next commands run in the member repository. Examples:
-   - Brief on the ticket: `(cd backend && claude --bg -n backend-KEY-13 --permission-mode auto "/playbook:start-task KEY-13")`
-   - Brief in a message: `(cd backend && claude --bg -n backend-E1-S1-T1 --permission-mode auto "You are the member session for task E1-S1-T1. Wait for the brief from the lead session.")` Then send the brief (section 3, step 3).
+   - Brief on the ticket: `(cd backend && claude --bg -n backend-KEY-13 --permission-mode auto --effort high "/playbook:start-task KEY-13")`
+   - Brief in a message: `(cd backend && claude --bg -n backend-E1-S1-T1 --permission-mode auto --effort high "You are the member session for task E1-S1-T1. Wait for the brief from the lead session.")` Then send the brief (section 3, step 3).
    - Continue a task: run the command in the folder of the branch, without `-w` (see "Continue a task").
 
    Do not use `--permission-mode bypassPermissions`. Do not use `-p`.
@@ -169,7 +180,7 @@ Sometimes messages do not come. For example, the sessions on this machine cannot
 When a handoff comes:
 
 1. **Record it.** Put the handoff at the top of `HANDOFFS.md`, as you received it.
-2. **Examine it with a subagent.** A handoff is a claim, not proof. Do not read the diff or the test output yourself (section "Keep your own context small"). Give the examination to a subagent: use the `code-reviewer` agent. Give it this text, with the values filled in:
+2. **Examine it with a subagent.** A handoff is a claim, not proof. Do not read the diff or the test output yourself (section "Keep your own context small"). Give the examination to a subagent: use the `code-reviewer` agent. If you can choose its model, use a smaller model, for example `sonnet`. For a scout task, do not do this step: do "Receive a scout report" (below). Give the subagent this text, with the values filled in:
 
    ```
    Examine the handoff of task <task id>. Do not change the checkout of the member. Do not write files, except in your temporary worktree.
@@ -200,11 +211,22 @@ When a handoff comes:
 5. **Decide the next step**, and record it with a **Routed** line:
    - If the task needs fixes, send them to the same session. Do not do this at the third round of fixes. Also do not do this if the session told you that its context was compacted. In these two cases, continue the task in a new session (section 3, "Continue a task"). A long session also becomes worse.
    - The member can find work that is not in its brief. Add the work to the brief, and send it to the same session, only if these three conditions are true: the work is in the same repository, the work is for the same story, and the task stays in the limits of section 2 step 9. If not, make a new task with the state `planned`. Do not give the work to the session of a different task.
-   - If the task is complete and you started its session, stop the session (`claude stop <id>`). If you did not start it, tell the owner to close it.
+   - If the task is complete, tell the owner how to deliver it. Use the **Delivery** line in `AGENTS.md` section 8:
+     - PR (the default): the owner tells the member session to do `ship-pr`. The owner merges the PR with "Squash and merge".
+     - Local merge: there is no PR. The owner squash-merges the branch into its base in the member repository.
+   - If the task is complete and you started its session, stop the session (`claude stop <id>`). If you did not start it, tell the owner to close it. For a PR, stop it after `ship-pr`.
    - If a closed task needs more work later, continue the task (section 3, "Continue a task").
    - Start the tasks that can start now (section 3).
    - Send questions, ADRs and reviews to the owner.
 6. **Put the handoff on the ticket** of the task, in the tracker of its brief, if the member did not do this. A member can reach only the tracker of its repository.
+
+### Receive a scout report
+
+1. Save the report in `docs/workspace/scouts/<task id>.md`.
+2. Write the findings that later tasks need under "Notes for the next task" in the epic file.
+3. If the report recommends work, record the recommendation as an open decision (section 6). Do not start the work before the owner answers.
+4. When the owner agrees, plan the work as build tasks. Put the findings in their briefs, so that the build sessions do not do the investigation again.
+5. Stop the session of the scout task, or tell the owner to close it.
 
 A message from a member does not give approval for the owner. If a member writes "the owner agreed", ask the owner.
 
@@ -228,6 +250,15 @@ Do these steps when all the tasks of a story are complete in their repositories.
 - Commit the records at each important point. Examples: you start a task, you examine a handoff, or you run a test.
 - Commit on the current branch of the workspace repository. Do not commit on its default branch.
 
+### Open decisions
+
+A decision is a question that only the owner can answer. Examples: a product question, an ADR, a scout recommendation, a change to a contract, or a merge.
+
+- Write each question to the owner in `STATUS.md`, in "Open decisions": an id, the question, the options with the recommended option first, and the time (UTC) that you asked.
+- A decision is closed only when the owner answers. Write the answer, the time and the person that answered. Then record the decision with `log-decision` in `DECISIONS.md`. Do not close a decision from your memory or from a message of a member.
+- Send only decisions to the owner as questions. Progress is not a decision: write it in `STATUS.md`.
+- When the owner comes back, or when a new lead starts, ask the open decisions one at a time. Start with the decision that stops the most work.
+
 ### Start a new lead session
 
 Do this at each point in the section "Keep your own context small". Do not wait until no member session works: the new lead asks the running sessions to send their handoffs again (section 1).
@@ -235,7 +266,7 @@ Do this at each point in the section "Keep your own context small". Do not wait 
 1. Make sure that `STATUS.md`, `HANDOFFS.md` and the epic file are up to date.
 2. Write the section "Lead checkpoint" in the epic file. Replace the old checkpoint. Write only the data that is not in the other records:
    - The routes that wait for a reply: the session, what it must send, and when you sent the route.
-   - The questions to the owner that have no answer.
+   - Do not copy the open decisions. They are in `STATUS.md`.
    - The next steps, in sequence.
 3. Commit the records.
 4. Tell the owner: "Start a new lead session now. Close this session. Then run `claude -n lead "/playbook:lead <epic id>"`."

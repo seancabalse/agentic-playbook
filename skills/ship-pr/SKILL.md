@@ -43,6 +43,8 @@ List what the branch changes: `git diff --name-only <base>...HEAD`. If any chang
 
 ## 6. PR
 
+If `AGENTS.md` section 8 says **Delivery: local merge**, there is no PR. Do the first bullet below, but do not push. Write the title and the description as below. Then give the owner the commands to squash-merge the branch into its base: `git checkout <base>`, `git merge --squash <branch>`, and `git commit` with the title as the subject and the description as the body. Do not merge yourself.
+
 - Bring the branch up to date with `sync-branch` (rebase onto the team branch, checks, `--force-with-lease`). Then push the branch, and open the PR against the default branch (or the stacked base, if its PR is still open; check it isn't already merged).
 - **The title becomes the commit on the team branch** (PRs are squash-merged, `principles/10-delivery-ci-release.md` #3): imperative, customer-facing, with the ticket id. Don't squash the branch yourself.
 - Fill the body from `${CLAUDE_PLUGIN_ROOT}/templates/pr-description.md`:
