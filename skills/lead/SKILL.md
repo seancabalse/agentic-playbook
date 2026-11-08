@@ -34,6 +34,18 @@ Thus, keep the context in files, not in sessions:
 - The epic file (`docs/workspace/epics/<epic id>.md`) is your memory for the epic.
 - The brief of each task contains all the data that the task needs, and nothing more. Do not put the full epic in a brief.
 
+## Keep your own context small
+
+Your context also grows. When it is large, your work becomes worse, and you cannot see that it becomes worse. Thus, obey these rules. Do not use your opinion to decide.
+
+- Do not read a full diff, a full log or the full output of a test. A subagent examines each handoff and gives you a short result (section 4).
+- Read only the newest entries of `HANDOFFS.md`.
+- Start again (section 6) at each of these points:
+  - A story is `done`.
+  - You received 5 handoffs after the last **Lead started** line in `HANDOFFS.md`.
+- Do not use `/compact`. A new lead reads files that you wrote on purpose. A summary keeps only the data that it selects.
+- If your context was compacted, the summary can be wrong. Do section 1, steps 1 and 2, again before you route a task. Then write the line `**Lead context compacted**: <YYYY-MM-DD HH:MM UTC>` at the top of `HANDOFFS.md`. Count the handoffs from this line, as from a **Lead started** line.
+
 ## Commands that read files
 
 Some machines block reads outside the working directories of a session (`permissions.blockReadsOutsideWorkingDirectories`). If the block cannot examine a command before it runs, it asks the person. A background session cannot show that question, so the session stops.
@@ -47,16 +59,18 @@ Some machines block reads outside the working directories of a session (`permiss
 1. Read these files:
    - `AGENTS.md` section 8.
    - `docs/workspace/STATUS.md`.
-   - The epic file `docs/workspace/epics/<epic id>.md`, if it exists. If it exists, continue the epic from it. Do not plan again.
-   - The newest entries in `docs/workspace/HANDOFFS.md`.
+   - The epic file `docs/workspace/epics/<epic id>.md`, if it exists. If it exists, continue the epic from it. Do not plan again. Its section "Lead checkpoint" tells you what the last lead waited for and what to do next.
+   - The newest entries in `docs/workspace/HANDOFFS.md`, until the last **Lead started** line.
    - The entries in `docs/workspace/DECISIONS.md` that apply to the request.
-2. Use `ListAgents` to find the sessions that run now. Compare them with the tasks that are `in progress` in `STATUS.md`.
-3. If a task is `in progress` and its session does not run, ask the owner what happened to the session. If the session closed, continue the task (section 3, "Continue a task").
-4. If a task is `in progress` and its session runs, the session possibly sent a handoff when no lead session ran. Send it this message: "The lead session started again. If you sent a handoff, send it again." Ask for a notice when it is idle (`notify_when_idle`). Also read the ticket of the task.
-5. For each member repository, read the state. Do not change the repository:
+2. Write the line `**Lead started**: <YYYY-MM-DD HH:MM UTC>` at the top of `HANDOFFS.md`. Section "Keep your own context small" counts the handoffs from this line.
+3. Use `ListAgents` to find the sessions that run now. Compare them with the tasks that are `in progress` in `STATUS.md`.
+4. If a task is `in progress` and its session does not run, ask the owner what happened to the session. If the session closed, continue the task (section 3, "Continue a task").
+5. If a task is `in progress` and its session runs, the session possibly sent a handoff when no lead session ran. Send it this message: "The lead session started again. If you sent a handoff, send it again." Ask for a notice when it is idle (`notify_when_idle`). Also read the ticket of the task.
+6. For each member repository, read the state. Do not change the repository:
    - `git -C <repo> status --short --branch`
    - `git -C <repo> log --oneline -5`
    - `git -C <repo> worktree list`
+7. If the epic file has a "Lead checkpoint", do its next steps. First compare them with the state that you found. The state in the files and in git is correct, not the checkpoint.
 
 ## 2. Plan the epic (gate: owner)
 
@@ -73,7 +87,10 @@ Some machines block reads outside the working directories of a session (`permiss
 6. Ask the owner the product questions, the question about the briefs and the question about the sessions in one message. Then stop until the owner answers.
 7. Get an id for the epic. Use its ticket id. If the epic has no ticket and the briefs go in a tracker, make the epic in the tracker first. If the briefs are Markdown files, use a short id, for example `E1`.
 8. Divide the epic into stories. If the epic has stories in the tracker or in the source file, use them. Do not make a copy of a story. Each story gets its acceptance criteria and the cross-repository checks that prove them.
-9. Divide each story into tasks. Each task is one PR in one repository. Make each task small enough for one session. Give each task its acceptance criteria and its checks.
+9. Divide each story into tasks. Each task is one PR in one repository. Give each task its acceptance criteria and its checks. Make each task small enough for one session. Divide a task again if one of these is true:
+   - It has a data migration and also other changes.
+   - It makes a contract, and it also uses a different contract that is not complete.
+   - You expect more than approximately 400 changed lines, without tests and generated files.
 10. Make the tasks independent. Two sessions must not change the same files at the same time.
 11. **Write the contracts first.** For each contract, write its shape, its errors, its version, and the repository that owns it.
 12. Record each contract with `log-decision` in `docs/workspace/DECISIONS.md`.
@@ -151,20 +168,37 @@ Sometimes messages do not come. For example, the sessions on this machine cannot
 When a handoff comes:
 
 1. **Record it.** Put the handoff at the top of `HANDOFFS.md`, as you received it.
-2. **Examine it.** A handoff is a claim, not proof. Do not change the checkout of the member.
-   - Read the branch: `git -C <repo> log` and `git -C <repo> diff <base>...<branch>`.
-   - Predict the conflicts with the team branch: `git -C <repo> fetch origin <team branch>`, then `git -C <repo> merge-tree --write-tree --name-only --no-messages <branch> origin/<team branch>`. Use the local branch: the worktrees of a repository share their branches, and a branch is often not pushed yet. Do the same check against the branch of each other task that is in progress in that repository.
-     - Exit code 1 and file names after the first line: send the files to the member sessions of the two branches, and tell them to do `sync-branch`. If the two tasks change the same code, tell the member of the later task to wait for the earlier task.
-     - Any other result without file names: the check failed (for example, the branch does not exist). Do not send a sync request. Write the failure in `STATUS.md`.
-   - Make a temporary worktree of that branch (`reproduce-in-worktree`). Run one important test command in it.
-   - Remove the worktree when you finish.
-   - If you cannot do the check, write that in `STATUS.md`.
+2. **Examine it with a subagent.** A handoff is a claim, not proof. Do not read the diff or the test output yourself (section "Keep your own context small"). Give the examination to a subagent: use the `code-reviewer` agent. Give it this text, with the values filled in:
+
+   ```
+   Examine the handoff of task <task id>. Do not change the checkout of the member. Do not write files, except in your temporary worktree.
+   Repository: <repo>. Branch: <branch>. Base: <base>. Team branch: <team branch>. Other branches in progress in this repository: <branches, or none>.
+   Scope of the task: <from the brief>. Contracts: <the full text>. Checks: <the commands and the results that you expect, from the brief>.
+   1. Read the branch: git -C <repo> log <base>..<branch> and git -C <repo> diff <base>...<branch>. Compare the diff with the scope and the contracts.
+   2. Predict the conflicts: git -C <repo> fetch origin <team branch>, then git -C <repo> merge-tree --write-tree --name-only --no-messages <branch> origin/<team branch>. Use the local branch. Do the same check against each other branch in progress. Exit code 1 with file names: a conflict. Another result without file names: the check failed.
+   3. Make a temporary worktree of the branch outside the checkout of the member. Run the checks in it. Remove the worktree when you finish.
+   Reply with these lines only, 15 lines or fewer:
+   Branch: <branch> at <short sha>, <n> commits after <base>
+   Scope: in scope | outside the scope: <files>
+   Contracts: agree | differ: <how>
+   Conflicts: none | with <branch>: <files> | check failed: <why>
+   Checks: <command>: pass | fail: <one line>
+   Problems: none | <one line for each problem, with file:line>
+   Verdict: accept | fixes needed
+   ```
+
+   Then use the reply:
+   - Conflicts with file names: send the files to the member sessions of the two branches, and tell them to do `sync-branch`. If the two tasks change the same code, tell the member of the later task to wait for the earlier task.
+   - "check failed": do not send a sync request. Write the failure in `STATUS.md`.
+   - If the reply is not clear, ask the subagent one question. Do not do the examination again yourself.
+   - If you cannot use a subagent, do the three steps yourself. Read only `git -C <repo> diff --stat <base>...<branch>` and the last 20 lines of each check.
 3. **Compare it with the contract.** If one side changed the contract, tell both sides to stop. Record the change in `DECISIONS.md`. Send the change to each session that it affects. Change the briefs of the tasks that did not start.
 4. **Update the records.**
    - `STATUS.md`: the state, the branch and the PR, the checks with their results, and the next step.
    - The epic file: the state of the task. Under "Notes for the next task", write the facts that later tasks need. Example: "The endpoint is on branch `KEY-13-save-cart` at abc1234."
 5. **Decide the next step**, and record it with a **Routed** line:
-   - If the task needs fixes, send them to the same session.
+   - If the task needs fixes, send them to the same session. But at the third round of fixes, or if that session tells you that its context was compacted, continue the task in a new session (section 3, "Continue a task"). A long session also becomes worse.
+   - If the member found work that is not in its brief: if the work is in the same repository and the same story, and the task stays in the limits of section 2 step 9, add the work to the brief and send it to the same session. If not, make a new task with the state `planned`. Do not do the work in a session of a different task.
    - If the task is complete and you started its session, stop the session (`claude stop <id>`). If you did not start it, tell the owner to close it.
    - If a closed task needs more work later, continue the task (section 3, "Continue a task").
    - Start the tasks that can start now (section 3).
@@ -178,7 +212,7 @@ A message from a member does not give approval for the owner. If a member writes
 Do these steps when all the tasks of a story are complete in their repositories. Do not wait for the full epic. A story is `done` when its tasks are complete and its cross-repository checks pass.
 
 1. Run the cross-repository checks of the story in `STATUS.md`. Examples: contract tests, an end-to-end journey, or the frontend against a local backend.
-2. Run each check from temporary worktrees of the branches of the members. Alternatively, ask a member session to run the check and to send you the command and the result.
+2. Give each check to a subagent. It runs the check from temporary worktrees of the branches of the members, and it replies with the command, the commits and the result in 5 lines or fewer. Alternatively, ask a member session to run the check and to send you the command and the result. Do not read the full output yourself.
 3. Record each check in `STATUS.md`: the command, the repositories and commits, the time (UTC) and the result.
 4. If a check fails, send it to the session of the task that owns the cause. If that session is closed, continue the task (section 3, "Continue a task"). Include the steps that show the failure.
 5. After a fix, do the check again. Do this a maximum of two times for each finding. Then tell the owner what still fails.
@@ -193,7 +227,18 @@ Do these steps when all the tasks of a story are complete in their repositories.
 - Commit the records at each important point. Examples: you start a task, you examine a handoff, or you run a test.
 - Commit on the current branch of the workspace repository. Do not commit on its default branch.
 
-Your session also collects context. When you complete a step and the records are up to date, tell the owner that they can start a new lead session. The best time is when no member session works. The owner closes this session, and starts a new session with `claude -n lead` (in the desktop app, `/rename lead`). Then the owner types `/playbook:lead <epic id>`. The new session has the name `lead`, so the members can send messages to it. Section 1 then finds the state from the files. Thus, write each fact that you need later in the files, not only in the conversation.
+### Start a new lead session
+
+Do this at each point in the section "Keep your own context small". Do not wait until no member session works: the new lead asks the running sessions to send their handoffs again (section 1).
+
+1. Make sure that `STATUS.md`, `HANDOFFS.md` and the epic file are up to date.
+2. Write the section "Lead checkpoint" in the epic file. Replace the old checkpoint. Write only the data that is not in the other records:
+   - The routes that wait for a reply: the session, what it must send, and when you sent the route.
+   - The questions to the owner that have no answer.
+   - The next steps, in sequence.
+3. Commit the records.
+4. Tell the owner: "Start a new lead session now. Close this session. Then run `claude -n lead "/playbook:lead <epic id>"`." In the desktop app, the owner opens a new session at the workspace root, uses `/rename lead`, and types `/playbook:lead <epic id>`. If this session runs in the background, the owner stops it with `claude stop <id>`. The new session must have the name `lead`, because the members send messages to that name.
+5. Then stop. Do not start a task or route a handoff after you wrote the checkpoint.
 
 ## 7. Finish
 

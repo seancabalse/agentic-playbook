@@ -38,4 +38,8 @@ The lead does these checks again when you finish:
 
 ## When you finish
 
+If you find work that is not in this brief, do not do it. Write it in your handoff. The lead decides.
+
+If your context was compacted, the summary can be wrong. Read this brief again: on the ticket, or ask the lead to send it again. Tell the lead that your context was compacted.
+
 When you complete the task, or when you cannot continue, write your handoff with the playbook template. Send it to the lead session (`lead`) with `SendMessage`. Also put it on the ticket, if this task has a ticket in the tracker of your repository. Then stop. The owner or the lead closes this session.

@@ -39,3 +39,13 @@ The full text of each contract is in `docs/workspace/DECISIONS.md`. List them he
 ## Notes for the next task
 
 <The facts that a later task needs from an earlier task. For example: "The endpoint is on branch `KEY-13-save-cart` at abc1234.">
+
+## Lead checkpoint
+
+The lead writes this section before a new lead session starts (lead skill, section 6). Replace it each time. Write only the data that is not in `STATUS.md`, `HANDOFFS.md` or the sections above.
+
+**Written**: <YYYY-MM-DD HH:MM UTC>
+**Waiting for**: <session: what it must send, routed at <time>>, or none
+**Questions to the owner**: <question>, or none
+**Next steps**:
+1. <step>

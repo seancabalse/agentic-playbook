@@ -216,7 +216,16 @@ A long session sends its whole conversation again with each message, so it uses 
 - each task's brief: the epic in one sentence, its story and the story's acceptance criteria, the task's acceptance criteria, the full contracts and what earlier tasks delivered;
 - `STATUS.md`, `HANDOFFS.md` and `DECISIONS.md`.
 
-The lead can restart too, best when no member session is working: close its session, start a new one with `claude -n lead` and run `/playbook:lead KEY-10`. It continues from those files. Give the new session the name `lead`, because the members send their handoffs to that name.
+### Keeping the lead's context small
+
+The lead's answers get worse as its context grows, and it can't tell. So the lead follows fixed rules instead of judging for itself:
+
+- **It doesn't read diffs or test output.** A `code-reviewer` subagent examines each handoff (the diff against the scope and contracts, the conflict prediction, and the checks in a temporary worktree) and replies in 15 lines or fewer. Cross-repository checks work the same way.
+- **It restarts at fixed points**: when a story is done, and after 5 handoffs. First it writes a **Lead checkpoint** in the epic file (what it is waiting for, open questions to you, next steps), commits the records and tells you to restart. Close it and run `claude -n lead "/playbook:lead KEY-10"` (in the background: `claude stop <id>`, then start it again with `--bg`). You don't need to wait until no member is working: the new lead asks running members to resend their handoffs. Keep the name `lead`, because the members send their handoffs to that name.
+- **Prefer a restart to `/compact`.** A new lead reads files written on purpose; a summary keeps whatever it picks.
+- **After auto-compaction**, the session-start hook tells the lead its summary can be wrong, and to re-read the records before it routes anything. A member is told to read its brief again, or to ask the lead to resend it.
+- **A member session gets fixes for two rounds.** At the third round, or after its context is compacted, the lead continues the task in a new session. Work a member finds outside its brief goes into its handoff; the lead adds it to the brief if it is small and in the same story and repository, and otherwise makes a new task.
+- **Tasks are split up front** when one would mix a data migration with other changes, would make one contract while it depends on another that isn't finished, or would be more than about 400 changed lines.
 
 A task that needs another session later, for review comments or a failed check, keeps its sub-task and its branch. The lead adds the last handoff to the brief, and the new session starts in the branch's existing worktree.
 
