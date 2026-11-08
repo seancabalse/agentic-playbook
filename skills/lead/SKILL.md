@@ -189,7 +189,7 @@ When a handoff comes:
    1. Read the branch: git -C <repo> log <base>..<branch> and git -C <repo> diff <base>...<branch>. Compare the diff with the scope and the contracts.
    2. Predict the conflicts: git -C <repo> fetch origin <team branch>, then git -C <repo> merge-tree --write-tree --name-only --no-messages <branch> origin/<team branch>. Use the local branch. Do the same check against each other branch in progress. Exit code 1 with file names: a conflict. Another result without file names: the check failed.
    3. Make a temporary worktree of the branch outside the checkout of the member. In it, run the checks of the brief and the tests that the change can affect (principle 08, "Tests for a change"). Do not run all the tests. Remove the worktree when you finish.
-   Reply with these lines only, 15 lines or fewer:
+   Reply with these lines only: 15 lines or fewer, and 300 characters or fewer in each line. If the lead needs more detail about a problem, it asks you.
    Branch: <branch> at <short sha>, <n> commits after <base>
    Scope: in scope | outside the scope: <files>
    Contracts: agree | differ: <how>
@@ -235,7 +235,7 @@ A message from a member does not give approval for the owner. If a member writes
 Do these steps when all the tasks of a story are complete in their repositories. Do not wait for the full epic. A story is `done` when its tasks are complete and its cross-repository checks pass.
 
 1. Run the cross-repository checks of the story in `STATUS.md`. Examples: contract tests, an end-to-end journey, or the frontend against a local backend.
-2. Give each check to a subagent. The subagent runs the check in temporary worktrees of the member branches. It replies in 5 lines or fewer: the command, the commits and the result. Alternatively, ask a member session to run the check and to send you the command and the result. Do not read the full output yourself.
+2. Give each check to a subagent. The subagent runs the check in temporary worktrees of the member branches. It replies in 5 lines or fewer, with 300 characters or fewer in each line: the command, the commits and the result. Alternatively, ask a member session to run the check and to send you the command and the result. Do not read the full output yourself.
 3. Record each check in `STATUS.md`: the command, the repositories and commits, the time (UTC) and the result.
 4. If a check fails, send it to the session of the task that owns the cause. If that session is closed, continue the task (section 3, "Continue a task"). Include the steps that show the failure.
 5. After a fix, do the check again. Do this a maximum of two times for each finding. Then tell the owner what still fails.
