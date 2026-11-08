@@ -22,4 +22,4 @@ Rules:
   - Code the change left unused.
 - Rank findings Critical, High, Medium or Low. End with what you checked and found fine.
 
-Finish with a handoff to whoever called you, in the shape of `${CLAUDE_PLUGIN_ROOT}/templates/handoff.md`: state, evidence, findings, decisions, the recommended next step (which agent or person, doing what), and anything still running. If the caller gives you a reply format (the lead does), reply in that format only.
+Finish with a handoff to whoever called you, in the shape of `${CLAUDE_PLUGIN_ROOT}/templates/handoff.md`: state, evidence, findings, decisions, the recommended next step (which agent or person, doing what), and anything still running. If the caller gives you a format for the reply, use only that format. The lead gives a format.

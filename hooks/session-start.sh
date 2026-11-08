@@ -5,8 +5,9 @@
 project="${CLAUDE_PROJECT_DIR:-$PWD}"
 root="${CLAUDE_PLUGIN_ROOT:-}"
 local_dir="$project/.playbook/local"
-# The event says why the session starts: startup, resume, clear or compact.
-input=""; [ -t 0 ] || input="$(cat)"
+# The event says why the session starts: startup, resume, clear or compact. Claude Code writes the event
+# and closes stdin; the time limit keeps a run with an open, empty stdin from waiting forever.
+input=""; [ -t 0 ] || IFS= read -r -d '' -t 2 input || true
 compacted=0
 if printf '%s' "$input" | grep -Eq '"source"[[:space:]]*:[[:space:]]*"compact"'; then compacted=1; fi
 
@@ -32,7 +33,7 @@ if grep -qs '^## 8\. This workspace' "$ws/AGENTS.md"; then
     echo "This folder is a workspace with more than one repository (AGENTS.md, section 8). This session is the lead of the workspace. Follow the lead skill. Give each task a new member session with a complete brief. Keep docs/workspace/ up to date. Do not change files in the member repositories. To read files, use the Read tool, or write each path in full in a shell command: no loops, variables or cd."
     # After compaction, the lead must rebuild its state from the files, not from the summary.
     if [ "$compacted" -eq 1 ]; then
-      echo "Your context was compacted. The summary can be wrong. Before you route a task, do section 1, steps 1 and 2, of the lead skill again. Then write the line **Lead context compacted** at the top of docs/workspace/HANDOFFS.md (lead skill, \"Keep your own context small\")."
+      echo "Your context was compacted. The summary can be wrong. Before you route a task, do section 1 of the lead skill again. In step 2, write the line **Lead context compacted** at the top of docs/workspace/HANDOFFS.md, not a **Lead started** line."
     fi
   # Only the repositories in the Members table are members; reference and other folders are not.
   elif grep -q "^| \`${rel%%/*}/\` |" "$ws/AGENTS.md"; then

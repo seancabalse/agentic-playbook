@@ -218,14 +218,15 @@ A long session sends its whole conversation again with each message, so it uses 
 
 ### Keeping the lead's context small
 
-The lead's answers get worse as its context grows, and it can't tell. So the lead follows fixed rules instead of judging for itself:
+When the context of the lead becomes large, its work becomes worse, and the lead cannot see this. Thus, the lead obeys fixed rules. It does not use its opinion to decide.
 
-- **It doesn't read diffs or test output.** A `code-reviewer` subagent examines each handoff (the diff against the scope and contracts, the conflict prediction, and the checks in a temporary worktree) and replies in 15 lines or fewer. Cross-repository checks work the same way.
-- **It restarts at fixed points**: when a story is done, and after 5 handoffs. First it writes a **Lead checkpoint** in the epic file (what it is waiting for, open questions to you, next steps), commits the records and tells you to restart. Close it and run `claude -n lead "/playbook:lead KEY-10"` (in the background: `claude stop <id>`, then start it again with `--bg`). You don't need to wait until no member is working: the new lead asks running members to resend their handoffs. Keep the name `lead`, because the members send their handoffs to that name.
-- **Prefer a restart to `/compact`.** A new lead reads files written on purpose; a summary keeps whatever it picks.
-- **After auto-compaction**, the session-start hook tells the lead its summary can be wrong, and to re-read the records before it routes anything. A member is told to read its brief again, or to ask the lead to resend it.
-- **A member session gets fixes for two rounds.** At the third round, or after its context is compacted, the lead continues the task in a new session. Work a member finds outside its brief goes into its handoff; the lead adds it to the brief if it is small and in the same story and repository, and otherwise makes a new task.
-- **Tasks are split up front** when one would mix a data migration with other changes, would make one contract while it depends on another that isn't finished, or would be more than about 400 changed lines.
+- **The lead does not read diffs or test output.** A `code-reviewer` subagent examines each handoff. It compares the diff with the scope and the contracts, predicts the conflicts, and runs the checks in a temporary worktree. It replies in 15 lines or fewer. A subagent also runs the cross-repository checks.
+- **The lead starts again at fixed points**: when a story is done, and after 5 handoffs. First, it writes a **Lead checkpoint** in the epic file: the replies that it waits for, your open questions and the next steps. Then it commits the records and tells you to start a new lead. Close the lead, and run `claude -n lead "/playbook:lead KEY-10"`. For a lead in the background, run `claude stop <id>`, then start it again with `--bg`. You do not have to wait until no member works. The new lead asks the running members to send their handoffs again. Keep the name `lead`, because the members send their handoffs to that name.
+- **Start a new lead. Do not use `/compact`.** A new lead reads files that were written on purpose. A summary keeps only the data that it selects.
+- **After an automatic compaction**, the session-start hook tells the lead that its summary can be wrong. The lead reads the records again before it routes a task. A member reads its brief again, or asks the lead to send it again.
+- **A member session gets fixes for two rounds only.** At the third round, or after its context is compacted, the lead continues the task in a new session.
+- **A member does not do work that is not in its brief.** It writes the work in its handoff. If the work is small, in the same repository and for the same story, the lead adds it to the brief. If not, the lead makes a new task.
+- **The lead divides a task before it starts** if the task has a data migration and other changes, or makes one contract and uses a different contract that is not complete, or has more than approximately 400 changed lines.
 
 A task that needs another session later, for review comments or a failed check, keeps its sub-task and its branch. The lead adds the last handoff to the brief, and the new session starts in the branch's existing worktree.
 
@@ -339,7 +340,7 @@ Sections 1–4 of `AGENTS.md` stay the same in every project. Sections 5–7 are
 | `fix-bug` | Reproduce, write a failing test, find the root cause, fix, and record the lesson. |
 | `sync-branch` | Keep a task branch current with the team branch (main or dev): predict conflicts, rebase, resolve the clear ones or stop, run the checks, push with `--force-with-lease`. |
 | `reproduce-in-worktree` | Reproduce a bug or review finding in an isolated git worktree and try the fix there before a person is involved. |
-| `verify-feature` | Walk the acceptance criteria in the running product, including error and edge states. |
+| `verify-feature` | Find the impact of the change, run only the tests that it can affect, and walk the acceptance criteria in the running product, with the error and edge states. |
 | `capture-screenshots` | Capture states × sizes × settings as evidence for a PR. |
 | `handoff` | Write or resume a handoff between agents, sessions or people. |
 | `lead` | Lead a workspace of several repositories: divide an epic into stories and tasks, agree the contracts, give each task a new session with a complete brief, route the handoffs, and keep the records. |
@@ -357,7 +358,7 @@ Sections 1–4 of `AGENTS.md` stay the same in every project. Sections 5–7 are
 | `product-owner` | Product owner, project owner and project manager: clarifies requirements and scope, in ASD-STE100. |
 | `product-engineer` | The only agent that writes code: builds the plan and applies review fixes, in its own worktree. |
 | `architect` | Designs features and drafts ADRs. |
-| `qa-verifier` | Runs the product, walks the acceptance criteria and captures screenshots. |
+| `qa-verifier` | Finds the impact of the change and runs only the tests that it can affect. Runs the product, walks the acceptance criteria and captures screenshots. |
 | `code-reviewer`, `security-auditor`, `design-reviewer` | Independent, read-only reviews. |
 | `docs-keeper` | Keeps the repository and tracker documentation in step, in its own worktree. |
 

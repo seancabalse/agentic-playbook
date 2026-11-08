@@ -156,7 +156,7 @@ Claude copies the checklist into a dated doc and works through it: CI, `verify-f
 1. **start-task** posts the plan on the ticket. If there are product questions it asks you and **stops** until you answer.
 2. For structural work the **architect** agent returns a design handoff. If an ADR is needed, Claude drafts it and **stops** for you to accept it.
 3. The **product-engineer** agent builds it, following `implement`: test first, the layer checklists, the customer-journey check. It returns a handoff listing its changes and the checks it ran. If a customer-visible behaviour isn't settled it stops with a question instead of guessing. Claude, as tech lead, reads the whole diff and re-runs the checks itself.
-4. The **qa-verifier** agent runs the app, walks the criteria, captures screenshots, and returns a handoff with evidence paths. Claude opens one screenshot to confirm it before moving on.
+4. The **qa-verifier** agent finds the impact of the change and runs only the tests that it can affect (if a shared file changed, also the tests of the features that use it). Then it runs the app, walks the criteria, captures screenshots, and returns a handoff with evidence paths. Claude opens one screenshot to confirm it before moving on.
 5. **code-reviewer**, plus **security-auditor** (for auth, data or files) and **design-reviewer** (for UI), run in parallel and read-only, each returning ranked findings.
 6. The product engineer fixes the confirmed findings, Claude re-checks the diff, and qa-verifier re-checks what changed (at most 2 loops).
 7. The **docs-keeper** agent updates `AGENTS.md`, the Decision Log, Architecture and the Runbook wherever the Tracker section says they live.
