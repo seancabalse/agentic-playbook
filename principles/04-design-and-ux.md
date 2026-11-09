@@ -34,5 +34,5 @@ A shared gate component (`QueryGate`) decides between them from the query state,
 
 ## Review and evidence
 
-17. **Every UI PR has screenshots**: before and after, plus 200% zoom and dark mode or reduced motion when they matter. Store them outside the default branch (for example a `screenshots` branch) and embed them in the PR.
+17. **Every UI PR has screenshots** (`ship-pr` won't open one without them): before and after, plus 200% zoom and dark mode or reduced motion when they matter. Store them outside the default branch (for example a `screenshots` branch) and embed them in the PR.
 18. **Check it in the real app**, in the browsers and on the platforms you ship, before calling it done. Device emulation is fine for layout but says little about performance.

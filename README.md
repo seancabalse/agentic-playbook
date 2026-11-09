@@ -216,9 +216,26 @@ A long session sends its whole conversation again with each message, so it uses 
 - each task's brief: the epic in one sentence, its story and the story's acceptance criteria, the task's acceptance criteria, the full contracts and what earlier tasks delivered;
 - `STATUS.md`, `HANDOFFS.md` and `DECISIONS.md`.
 
-The lead can restart too, best when no member session is working: close its session, start a new one with `claude -n lead` and run `/playbook:lead KEY-10`. It continues from those files. Give the new session the name `lead`, because the members send their handoffs to that name.
+### Keeping the lead's context small
+
+When the context of the lead becomes large, its work becomes worse, and the lead cannot see this. Thus, the lead obeys fixed rules. It does not use its opinion to decide.
+
+- **The lead does not read diffs or test output.** A `code-reviewer` subagent examines each handoff. It compares the diff with the scope and the contracts, predicts the conflicts, and runs the checks in a temporary worktree. It replies in 15 lines or fewer, with 300 characters or fewer in each line. A subagent also runs the cross-repository checks.
+- **The lead starts again at fixed points**: when a story is done, and after 5 handoffs. First, it writes a **Lead checkpoint** in the epic file: the replies that it waits for, your open questions and the next steps. Then it commits the records and tells you to start a new lead. Close the lead, and run `claude -n lead "/playbook:lead KEY-10"`. For a lead in the background, run `claude stop <id>`, then start it again with `--bg`. You do not have to wait until no member works. The new lead asks the running members to send their handoffs again. Keep the name `lead`, because the members send their handoffs to that name.
+- **Start a new lead. Do not use `/compact`.** A new lead reads files that were written on purpose. A summary keeps only the data that it selects.
+- **After an automatic compaction**, the session-start hook tells the lead that its summary can be wrong. The lead reads the records again before it routes a task. A member reads its brief again, or asks the lead to send it again.
+- **A member session gets fixes for two rounds only.** At the third round, or after its context is compacted, the lead continues the task in a new session.
+- **A member does not do work that is not in its brief.** It writes the work in its handoff. If the work is small, in the same repository and for the same story, the lead adds it to the brief. If not, the lead makes a new task.
+- **The lead divides a task before it starts** if the task has a data migration and other changes, or makes one contract and uses a different contract that is not complete, or has more than approximately 400 changed lines.
 
 A task that needs another session later, for review comments or a failed check, keeps its sub-task and its branch. The lead adds the last handoff to the brief, and the new session starts in the branch's existing worktree.
+
+### Scout tasks, effort levels, open decisions and delivery
+
+- **Scout tasks.** If an unknown stops the plan of a story, the lead makes a scout task first. Examples: an area of the code that nobody understands, a risk, or a choice between approaches. A scout session investigates and sends a report, with no PR. The lead saves it in `docs/workspace/scouts/`. A report can recommend work, but only you give approval. The lead puts the findings in the briefs of the build tasks, so that they do not investigate again.
+- **Effort levels.** The lead gives each task an effort level: `low` for a small task with a clear path, `medium` or `high` for a usual task, `xhigh` for an unclear design or a scout task. It never uses `max` unless you ask. The start command includes `--effort <level>`. In the desktop app, type `/effort <level>` in the new session.
+- **Open decisions.** The lead writes each question for you in `STATUS.md`, "Open decisions", with the options and the recommended option first. A decision closes only when you answer. Then the lead records it in `DECISIONS.md`. The lead asks only decisions, and writes progress in `STATUS.md`. When you come back, or when a new lead starts, it asks the open decisions one at a time, starting with the one that stops the most work.
+- **Delivery.** Section 8 of `AGENTS.md` has a **Delivery** line: PR (the default), or local merge. With a local merge, `ship-pr` opens no PR. It gives you the commands to squash-merge the branch locally.
 
 ### Letting the lead start the sessions (CLI)
 
@@ -233,8 +250,10 @@ Before you say yes:
 The lead starts each one like this (the parentheses keep the lead's own shell at the workspace root), and records the short id it prints:
 
 ```bash
-(cd backend && claude --bg -n backend-KEY-13 --permission-mode auto "/playbook:start-task KEY-13")
+(cd backend && claude --bg -n backend-KEY-13 --permission-mode auto --effort high "/playbook:start-task KEY-13")
 ```
+
+You can also run the lead itself in the background. Claude Code lets a background session write only in a worktree. The lead must write its records at the workspace root, so the setup writes `"worktree": { "bgIsolation": "none" }` in the workspace's `.claude/settings.json`. This changes only the workspace repository, which holds only the records. The member repositories keep the guard. The lead never makes or enters a worktree for itself.
 
 To watch or step in, use `claude agents` (the list), `claude attach <id>` and `claude logs <id>`. When a task is done, the lead runs `claude stop <id>`, which keeps the conversation; it never runs `claude rm`. If a session stops at a permission or trust question, the lead tells you to open it with `claude attach <id>`. If a member asks a product question, the lead passes it to you and sends your answer back.
 
@@ -279,6 +298,14 @@ A plugin update doesn't change sessions that are already running: each keeps the
 6. **Clean up.** When a task's PR is merged, remove its worktree, for example `git -C backend worktree remove .claude/worktrees/backend-2`.
 
 Members send their handoffs to the lead, and the lead routes the next step. The sessions talk through Claude Code's [cross-session messages](https://code.claude.com/docs/en/cross-session-messaging.md), which need no setup. Run them all on the same machine; on Windows, all natively or all inside WSL, because the two can't message each other. The roles and rules are in `principles/15-agent-collaboration.md`, "Across repositories".
+
+
+### When a session stops, and after a merge
+
+- **A session can stop in the middle of a turn.** Examples: the usage limit of your account, or "Your computer went to sleep mid-response". Work that is not committed stays in its worktree. The lead waits until the limit resets, then tells the session to continue. If the session cannot receive messages, the lead stops it and continues the task in a new session, in the same worktree. If the lead itself stopped, send it a message to continue. If `lead` is not in the list of sessions, start a new lead: it continues from the records.
+- **Keep the computer awake during a long run.** On macOS: `caffeinate -i`. On Windows, set the power plan so that the computer does not sleep; WSL sleeps when Windows sleeps.
+- **The lead runs its subagents in the foreground.** A background subagent that completes after the turn of the lead ends possibly does not wake the lead.
+- **After each merge, remove the worktree and the branch of the task.** The merge request of the lead gives you the commands. First, `git diff --quiet <branch> <merge commit>` makes sure that the merge contains all of the branch. Then `git worktree remove` without `--force` keeps a worktree that has changes that are not committed. When the epic is complete, the lead makes sure that no worktree or branch of a completed task remains.
 
 ## Keeping long-running branches current
 
@@ -330,7 +357,7 @@ Sections 1–4 of `AGENTS.md` stay the same in every project. Sections 5–7 are
 | `fix-bug` | Reproduce, write a failing test, find the root cause, fix, and record the lesson. |
 | `sync-branch` | Keep a task branch current with the team branch (main or dev): predict conflicts, rebase, resolve the clear ones or stop, run the checks, push with `--force-with-lease`. |
 | `reproduce-in-worktree` | Reproduce a bug or review finding in an isolated git worktree and try the fix there before a person is involved. |
-| `verify-feature` | Walk the acceptance criteria in the running product, including error and edge states. |
+| `verify-feature` | Find the impact of the change, run only the tests that it can affect, and walk the acceptance criteria in the running product, with the error and edge states. |
 | `capture-screenshots` | Capture states × sizes × settings as evidence for a PR. |
 | `handoff` | Write or resume a handoff between agents, sessions or people. |
 | `lead` | Lead a workspace of several repositories: divide an epic into stories and tasks, agree the contracts, give each task a new session with a complete brief, route the handoffs, and keep the records. |
@@ -348,7 +375,7 @@ Sections 1–4 of `AGENTS.md` stay the same in every project. Sections 5–7 are
 | `product-owner` | Product owner, project owner and project manager: clarifies requirements and scope, in ASD-STE100. |
 | `product-engineer` | The only agent that writes code: builds the plan and applies review fixes, in its own worktree. |
 | `architect` | Designs features and drafts ADRs. |
-| `qa-verifier` | Runs the product, walks the acceptance criteria and captures screenshots. |
+| `qa-verifier` | Finds the impact of the change and runs only the tests that it can affect. Runs the product, walks the acceptance criteria and captures screenshots. |
 | `code-reviewer`, `security-auditor`, `design-reviewer` | Independent, read-only reviews. |
 | `docs-keeper` | Keeps the repository and tracker documentation in step, in its own worktree. |
 
@@ -368,6 +395,14 @@ Set up a project for this (`/bootstrap-project` does it):
 | `.claude/settings.json` | `"worktree": { "baseRef": "head" }` | Claude Code branches agent worktrees from the default branch unless this is set. With it, they start from the branch you're on. |
 | `.worktreeinclude` | Copy `templates/worktreeinclude` | Gitignored files a worktree needs to run the app and tests, such as `.env`. Never list secrets a worktree doesn't need. |
 | `.gitignore` | `.claude/worktrees/` | Claude Code keeps its worktrees there. |
+
+**Merging.** PRs are squash-merged: one commit per PR on the team branch, titled from the PR, while the branch keeps its small commits for review. Set the repository to allow only that and to delete merged branches (`/bootstrap-project` lists it as an owner task):
+
+```bash
+gh repo edit --enable-squash-merge --enable-merge-commit=false --enable-rebase-merge=false --squash-merge-commit-message pr-title-description --delete-branch-on-merge
+```
+
+**Screenshots.** `/ship-pr` won't open a PR that changes anything a person sees (components, screens, styles, copy, images, email or notification templates) without screenshots from `capture-screenshots`. A PR with no visible change says why instead.
 
 ## Guardrails
 
