@@ -16,6 +16,15 @@ Target: $ARGUMENTS
 - Use the project's runbook for launch commands and the test accounts (a scripted second user for multi-user flows).
 - Pick the driver for the platform (`${CLAUDE_PLUGIN_ROOT}/principles/08-testing-qa.md` → "Drivers"): Playwright or the agent's browser tools for web; `curl` or the test client for an API.
 
+## Find the impact
+
+Do the impact assessment in `${CLAUDE_PLUGIN_ROOT}/principles/08-testing-qa.md`, "Tests for a change". Then:
+
+1. Run only the automated tests that the change can affect. Do not run all the tests, except when the assessment tells you to.
+2. Walk the acceptance criteria of the task (below).
+3. A changed shared file can affect other features. For each of these features, walk its main path one time, and its state that uses the shared file.
+4. Put the impact assessment in your report.
+
 ## Walk it
 
 1. **Acceptance criteria**, one by one, as a customer would. Record what you did and what you saw.

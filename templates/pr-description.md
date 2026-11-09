@@ -1,4 +1,4 @@
-<!-- Title: imperative, customer-facing, with the ticket id. "Show 'You're offline' instead of a blank screen on a first offline start (PROJ-126)" -->
+<!-- Title: imperative, customer-facing, with the ticket id. "Show 'You're offline' instead of a blank screen on a first offline start (PROJ-126)". PRs are squash-merged: this title and the description become the commit on the team branch. -->
 
 <Ticket id> (<requirement ids>). <One or two sentences: what changes for the person using it.>
 
@@ -17,6 +17,8 @@
 **Not verified**: <platforms, credentials, devices you don't have>, with ticket <id> if it matters
 
 **Needs**: <new build / env var / migration deploy / owner action>
+
+<!-- Screenshots: required when anything a person sees changes. Otherwise replace the table with: "Screenshots: none — <why nothing visible changes>". -->
 
 | <State 1> | <State 2> |
 | -- | -- |

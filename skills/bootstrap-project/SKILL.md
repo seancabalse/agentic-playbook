@@ -53,6 +53,7 @@ Project changes to a playbook file go in `.playbook/local/<same path>` (the `cus
 - CI runs lint, typecheck, unit tests and the dependency audit (plus DB and integration tests if there's a backend), with pinned tool versions.
 - Secrets plan: the names needed per environment, and the owner sets each value (give the exact commands; never handle the values).
 - Branch protection on the default branch (owner task if you lack permission).
+- Squash merging only, with merged branches deleted (`principles/10-delivery-ci-release.md` #3; owner task if you lack permission): `gh repo edit --enable-squash-merge --enable-merge-commit=false --enable-rebase-merge=false --squash-merge-commit-message pr-title-description --delete-branch-on-merge`.
 
 ## 6. Owner tasks
 

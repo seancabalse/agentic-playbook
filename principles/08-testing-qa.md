@@ -50,3 +50,17 @@ Other platforms add their drivers in their own section of this file. Screenshots
 - **Integration tests** run against `supabase start` (Postgres, Auth, Storage, Realtime and Edge Functions locally) with real users that the admin client creates. Read the local service key with `supabase status -o env`, never echoed. Local email lands in Mailpit, where tests read sign-in codes.
 - **Realtime**: a test checks that every table a channel subscribes to is in the publication, and that secret columns aren't published.
 - **CI** starts only what the tests need (`supabase start -x studio,imgproxy`, for example), and runs `supabase test db` and the integration tests on every PR that touches data.
+
+## Tests for a change
+
+This section is for the verification of a change: the `qa-verifier` agent, the `verify-feature` skill, and the examination of a handoff by the lead. Rule 12 is for the author before a PR.
+
+15. **Run the tests that the change can affect. Do not run all the tests.** First, do an impact assessment:
+    1. Find the changed files: `git diff --name-only <base>...HEAD`, and `git status --short` for the files that are not committed.
+    2. For each changed file, find the code that uses it. Find the files that import it, then the files that import those files. Continue until you find the tests and the entry points (a route, a screen, a handler, a job). A test runner can do this for you. Examples: `vitest related --run <files>`, `jest --findRelatedTests <files>`, `nx affected -t test`. Read the docs for the installed version. If the runner cannot do it, search for the imports (`grep -rln "<module name>"`).
+    3. A shared file can affect many features. Examples: a utility, a type, a hook, a component of the kit, a schema, a query, a client, a style token. Test each feature that uses the shared file, not only the feature of the task.
+    4. Some changes can affect all the code. For these changes, run all the tests: dependencies or the lockfile; the configuration of the build, the lint, the types or the tests; environment variables; global setup (providers, the app shell, the router, middleware, the database client); generated code. For a migration or an access policy, run all the database tests.
+    5. If you cannot find all the users of a file (for example dynamic imports, or routes in strings), make the scope larger. Run all the tests of the package or the module.
+16. **Run the typecheck and the lint for the full project** when they are fast (approximately 1 minute or less). They find the users of a change that the import search did not find.
+17. **Write the impact assessment in your report**: the changed files, the features that they affect, the tests that you ran, and the tests that you did not run, with the reason.
+18. **CI runs all the tests.** The impact assessment makes the local checks fast. It does not replace CI.
