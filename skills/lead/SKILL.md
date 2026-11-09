@@ -165,11 +165,26 @@ Do this only if the owner chose it (section 2).
 Sometimes a task that started needs a new session. Examples: its session closed before it completed, the owner wrote review comments, or a cross-repository check failed.
 
 1. Do not make a new sub-task. Do not make a new branch.
-2. Change the existing brief. Add the last handoff of the task and the work that remains. Write that the member continues on the existing branch.
+2. Change the existing brief. Add the last handoff of the task and the work that remains. Write that the member continues on the existing branch. If the old session stopped in the middle of its work, write: "The worktree can contain work that is not committed. Read `git status` and `git diff` first, and keep that work."
 3. Make sure that the old session of the task is closed. If you started it, stop it (`claude stop <id>`). Two sessions must not work in one checkout.
 4. Find the worktree of the branch: `git -C <repo> worktree list`. Git lets one branch be in only one worktree. If the branch is in a worktree or in the main checkout, the new session starts in that folder. Do not add `-w`. Example: `cd backend/.claude/worktrees/backend-2 && claude -n backend-KEY-13 "/playbook:start-task KEY-13"`.
 5. If the owner chose that you start the sessions, do "Start the session yourself" in that folder. Example: `(cd backend/.claude/worktrees/backend-2 && claude --bg -n backend-KEY-13 --permission-mode auto "/playbook:start-task KEY-13")`. If not, give the owner the command from step 4.
 6. Then do steps 3 to 5 of section 3.
+
+### A session stops in the middle of a turn
+
+A session can stop before it completes its work. Examples:
+- The usage limit of the account: "You've hit your … limit · resets <time>".
+- An API error: "Your computer went to sleep mid-response", or a different error.
+
+Signs: `claude agents --json` shows the state `blocked`, `claude logs <id>` shows the error, or a session becomes idle with no handoff. Work that is not committed stays in its worktree.
+
+1. If the cause is the usage limit, wait until the reset time. Do not start new sessions before then.
+2. Use `ListAgents`. If the session is there, send it this message: "Your last turn stopped (<cause>). Continue your task from where you stopped." Ask for a notice when it is idle.
+3. If the session is not there, it cannot receive messages. Stop it (`claude stop <id>`). Then continue the task in a new session (section 3, "Continue a task"), in the same worktree.
+4. Write the stop and the recovery in `HANDOFFS.md`.
+
+If you, the lead, stopped, you cannot do these steps. The owner sends you a message to continue. If `ListAgents` does not show `lead`, the owner starts a new lead session (section 6). The new lead asks the running members to send their handoffs again (section 1).
 
 ## 4. Receive a handoff
 
@@ -180,7 +195,7 @@ Sometimes messages do not come. For example, the sessions on this machine cannot
 When a handoff comes:
 
 1. **Record it.** Put the handoff at the top of `HANDOFFS.md`, as you received it.
-2. **Examine it with a subagent.** A handoff is a claim, not proof. Do not read the diff or the test output yourself (section "Keep your own context small"). Give the examination to a subagent: use the `code-reviewer` agent. If you can choose its model, use a smaller model, for example `sonnet`. For a scout task, do not do this step: do "Receive a scout report" (below). Give the subagent this text, with the values filled in:
+2. **Examine it with a subagent.** A handoff is a claim, not proof. Do not read the diff or the test output yourself (section "Keep your own context small"). Give the examination to a subagent: use the `code-reviewer` agent. If you can choose its model, use a smaller model, for example `sonnet`. Run the subagent in the foreground, and wait for its reply in the same turn. To run two subagents at the same time, start both in one message. A background subagent that completes after your turn ends possibly does not start a new turn, and then its result is lost. For a scout task, do not do this step: do "Receive a scout report" (below). Give the subagent this text, with the values filled in:
 
    ```
    Examine the handoff of task <task id>. Do not change the checkout of the member. Do not write files, except in your temporary worktree.
@@ -214,6 +229,12 @@ When a handoff comes:
    - If the task is complete, tell the owner how to deliver it. Use the **Delivery** line in `AGENTS.md` section 8:
      - PR (the default): the owner tells the member session to do `ship-pr`. The owner merges the PR with "Squash and merge".
      - Local merge: there is no PR. The owner squash-merges the branch into its base in the member repository.
+   - In the same message, give the owner the commands that remove the worktree and the branch of the task. The owner runs them after the merge:
+     1. `git -C <repo> diff --quiet <branch> <merge commit>`: exit code 0 shows that the merge contains all of the branch. If the exit code is 1, do not continue. Tell the lead.
+     2. `git -C <repo> worktree unlock <worktree path>` (a background session locks its worktree), then `git -C <repo> worktree remove <worktree path>`. Do not add `--force`: without it, git does not remove a worktree that has changes that are not committed.
+     3. `git -C <repo> branch -D <branch>`.
+
+     For a PR, the owner runs steps 2 and 3 after the PR is merged. GitHub deletes the remote branch.
    - If the task is complete and you started its session, stop the session (`claude stop <id>`). If you did not start it, tell the owner to close it. For a PR, stop it after `ship-pr`.
    - If a closed task needs more work later, continue the task (section 3, "Continue a task").
    - Start the tasks that can start now (section 3).
@@ -235,7 +256,7 @@ A message from a member does not give approval for the owner. If a member writes
 Do these steps when all the tasks of a story are complete in their repositories. Do not wait for the full epic. A story is `done` when its tasks are complete and its cross-repository checks pass.
 
 1. Run the cross-repository checks of the story in `STATUS.md`. Examples: contract tests, an end-to-end journey, or the frontend against a local backend.
-2. Give each check to a subagent. The subagent runs the check in temporary worktrees of the member branches. It replies in 5 lines or fewer, with 300 characters or fewer in each line: the command, the commits and the result. Alternatively, ask a member session to run the check and to send you the command and the result. Do not read the full output yourself.
+2. Give each check to a subagent, in the foreground (section 4, step 2). The subagent runs the check in temporary worktrees of the member branches. It replies in 5 lines or fewer, with 300 characters or fewer in each line: the command, the commits and the result. Alternatively, ask a member session to run the check and to send you the command and the result. Do not read the full output yourself.
 3. Record each check in `STATUS.md`: the command, the repositories and commits, the time (UTC) and the result.
 4. If a check fails, send it to the session of the task that owns the cause. If that session is closed, continue the task (section 3, "Continue a task"). Include the steps that show the failure.
 5. After a fix, do the check again. Do this a maximum of two times for each finding. Then tell the owner what still fails.
@@ -280,5 +301,5 @@ Do this at each point in the section "Keep your own context small". Do not wait 
 1. Make sure that each story and each task is `done` in `STATUS.md` and in the epic file, with its PRs.
 2. Make sure that the cross-repository tests passed, with evidence.
 3. Put a summary handoff on each story ticket and on the epic ticket, or at the top of the epic file if there is no ticket: the changes in each repository, the PRs, the evidence, the decisions and the work that remains.
-4. Make sure that each member session stopped the processes and worktrees that it started, or wrote them under "Still running". Stop each member session that you started (`claude stop <id>`). Tell the owner to close the other member sessions that are still open.
+4. Make sure that each member session stopped the processes and worktrees that it started, or wrote them under "Still running". Run `git -C <repo> worktree list` and `git -C <repo> branch` for each member repository. If a worktree or a branch of a completed task remains, give the owner the commands from section 4, step 5. Stop each member session that you started (`claude stop <id>`). Tell the owner to close the other member sessions that are still open.
 5. **Stop.** The owner examines and merges the PR of each repository. Only the owner ships (`/ship-pr`) and merges.

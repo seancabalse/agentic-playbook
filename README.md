@@ -299,6 +299,14 @@ A plugin update doesn't change sessions that are already running: each keeps the
 
 Members send their handoffs to the lead, and the lead routes the next step. The sessions talk through Claude Code's [cross-session messages](https://code.claude.com/docs/en/cross-session-messaging.md), which need no setup. Run them all on the same machine; on Windows, all natively or all inside WSL, because the two can't message each other. The roles and rules are in `principles/15-agent-collaboration.md`, "Across repositories".
 
+
+### When a session stops, and after a merge
+
+- **A session can stop in the middle of a turn.** Examples: the usage limit of your account, or "Your computer went to sleep mid-response". Work that is not committed stays in its worktree. The lead waits until the limit resets, then tells the session to continue. If the session cannot receive messages, the lead stops it and continues the task in a new session, in the same worktree. If the lead itself stopped, send it a message to continue. If `lead` is not in the list of sessions, start a new lead: it continues from the records.
+- **Keep the computer awake during a long run.** On macOS: `caffeinate -i`. On Windows, set the power plan so that the computer does not sleep; WSL sleeps when Windows sleeps.
+- **The lead runs its subagents in the foreground.** A background subagent that completes after the turn of the lead ends possibly does not wake the lead.
+- **After each merge, remove the worktree and the branch of the task.** The merge request of the lead gives you the commands. First, `git diff --quiet <branch> <merge commit>` makes sure that the merge contains all of the branch. Then `git worktree remove` without `--force` keeps a worktree that has changes that are not committed. When the epic is complete, the lead makes sure that no worktree or branch of a completed task remains.
+
 ## Keeping long-running branches current
 
 On a busy team branch (`main` or `dev`, with many commits a day), a branch that an agent works on for hours falls behind, and the conflicts grow while it works. The playbook catches this early:
