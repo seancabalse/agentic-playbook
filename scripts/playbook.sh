@@ -289,10 +289,14 @@ install_workspace() {
   note "wrote  $f"
   if [ ! -e "$ws/CLAUDE.md" ]; then cp "$ROOT/templates/CLAUDE.md" "$ws/CLAUDE.md"; note "wrote  $ws/CLAUDE.md"
   elif ! grep -q '@AGENTS.md' "$ws/CLAUDE.md"; then note "CLAUDE.md exists without @AGENTS.md: add that line"; fi
+  # A background session writes only in a worktree, unless bgIsolation is "none". The lead must write its
+  # records at the workspace root, and this repository holds only those records. Member repositories keep the guard.
   f="$ws/.claude/settings.json"
   if [ ! -e "$f" ]; then
-    mkdir -p "$ws/.claude"; printf '{\n  "worktree": { "baseRef": "head" }\n}\n' > "$f"
-    note "wrote  $f (agent worktrees start from the current branch)"
+    mkdir -p "$ws/.claude"; printf '{\n  "worktree": { "baseRef": "head", "bgIsolation": "none" }\n}\n' > "$f"
+    note "wrote  $f (agent worktrees start from the current branch; a background lead can write its records here)"
+  elif ! grep -q '"bgIsolation"' "$f"; then
+    note "kept   $f (exists): for a lead in the background, add \"bgIsolation\": \"none\" to its \"worktree\" object"
   fi
 
   # The lead's records. Never replaced, even with --force: they hold the workspace's history.

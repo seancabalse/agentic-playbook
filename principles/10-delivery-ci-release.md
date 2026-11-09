@@ -6,7 +6,7 @@ Small changes, always shippable, deployed by machines.
 
 1. **Short-lived branches from the default branch**, named from the ticket (`<user>/proj-123-short-title`). Stacked branches are fine, but rebase onto the default branch once the base merges. On a busy team branch, rebase often (`sync-branch`): at the start of a task, when the playbook hook says the branch is behind or a conflict is coming, and before each push, handoff and PR.
 2. **One concern per PR**, with the description from `templates/pr-description.md`. The owner reviews and merges.
-3. **Branches auto-delete after merge.** Don't push to a merged branch: open a new one.
+3. **Squash-merge every PR, then auto-delete the branch.** Each PR becomes one commit on the team branch: the PR title (imperative, with the ticket id) is its subject and the PR description its body, so the title must read as a good commit message. Inside the branch, keep the small test-first commits; don't squash or rewrite the branch for the merge, so reviewers keep "changes since last review". The repository allows only squash merging and deletes merged branches (owner: `gh repo edit --enable-squash-merge --enable-merge-commit=false --enable-rebase-merge=false --squash-merge-commit-message pr-title-description --delete-branch-on-merge`). Don't push to a merged branch: open a new one. A branch stacked on one that was squash-merged moves with `sync-branch` (section 7).
 4. **Commit messages and PRs follow the working agreement**: the why, the ticket id, and no AI attribution.
 
 ## CI
