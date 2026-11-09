@@ -4,6 +4,7 @@ This folder is a workspace. It is a git repository that contains the repositorie
 
 - **What it is**: <one sentence: who it is for and what it does>. PRD: <link>.
 - **Tracker**: <project or link>. The `AGENTS.md` of each repository gives its commands and rules.
+- **Delivery**: <PR (the default): each task ends with a PR, and the owner merges it with "Squash and merge"> or <local merge: no PR; the owner squash-merges each task branch locally>.
 
 ### Members
 
