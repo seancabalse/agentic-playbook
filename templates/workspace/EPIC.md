@@ -24,11 +24,11 @@ A story is a change that a user can see. It is `done` when its tasks are complet
 
 ## Tasks
 
-A task is one PR in one repository. One new member session does one task. Put the tasks in sequence.
+A build task is one PR in one repository. A scout task investigates and writes a report, with no PR. One new member session does one task. Put the tasks in sequence.
 
-| Task | Story | Repository | Summary | Waits for | Brief | State |
-| -- | -- | -- | -- | -- | -- | -- |
-| <KEY-13 or E1-S1-T1> | <KEY-11> | <backend/> | <the endpoint POST /carts/{id}/save> | <none, or a task> | <ticket link or file path> | planned · in progress · in review · done |
+| Task | Type | Effort | Story | Repository | Summary | Waits for | Brief | State |
+| -- | -- | -- | -- | -- | -- | -- | -- | -- |
+| <KEY-13 or E1-S1-T1> | build · scout | low · medium · high · xhigh | <KEY-11> | <backend/> | <the endpoint POST /carts/{id}/save> | <none, or a task> | <ticket link or file path> | planned · in progress · in review · done |
 
 ## Contracts
 
@@ -39,3 +39,12 @@ The full text of each contract is in `docs/workspace/DECISIONS.md`. List them he
 ## Notes for the next task
 
 <The facts that a later task needs from an earlier task. For example: "The endpoint is on branch `KEY-13-save-cart` at abc1234.">
+
+## Lead checkpoint
+
+The lead writes this section before a new lead session starts (lead skill, section 6). Replace it each time. Write only the data that is not in `STATUS.md`, `HANDOFFS.md` or the sections above. The open decisions are in `STATUS.md`.
+
+**Written**: <YYYY-MM-DD HH:MM UTC>
+**Waiting for**: <session: what it must send, routed at <time>>, or none
+**Next steps**:
+1. <step>
