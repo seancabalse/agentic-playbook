@@ -297,6 +297,43 @@ A plugin update doesn't change sessions that are already running: each keeps the
 
 6. **Clean up.** When a task's PR is merged, remove its worktree, for example `git -C backend worktree remove .claude/worktrees/backend-2`.
 
+### Moving a workspace from Windows (Claude Desktop) to WSL
+
+Use these steps with the steps above when you also move from the desktop app on Windows to the Claude Code CLI in WSL. Sessions in WSL and on Windows cannot send messages to each other, and the desktop app cannot open a session in WSL with the plugin. Thus, move the full workspace, the lead and all the members, at one time.
+
+Git worktrees, files that git ignores, the git settings of a clone and the trust of a folder do not move with a copy. Thus, clone the repositories again in WSL. Do not copy the folders.
+
+**On Windows, before you move:**
+
+1. Get all the handoffs, and let the old lead record them (steps 2 and 3 above). Each handoff must give its branch and its last commit.
+2. In each repository, and in each of its worktrees, make sure that all work is committed and each task branch is pushed. Use `git worktree list`, then `git -C <worktree> status --short` and `git -C <worktree> log origin/<branch>..<branch>`. Both commands must show nothing.
+3. Commit the records in the workspace repository. If it has a remote, push its branch.
+4. In each repository, list the files that git does not keep: `git status --short --ignored`. Examples: `.env`, `.env.local`, `.claude/settings.local.json`. You copy the ones that you need in step 9.
+5. Close all the sessions in the desktop app: the lead and each member. Then no session continues to work on Windows.
+
+**In WSL, one time on the machine:**
+
+6. Install git 2.38 or later, Node (with `nvm`), the GitHub CLI (`gh auth login`) and the Claude Code CLI, and log in to Claude Code. Set `git config --global core.autocrlf input`, and your git name and email.
+7. Install the playbook (see [Choosing how to install](#choosing-how-to-install)). For a fork, first update the fork on GitHub ("Sync fork").
+
+**In WSL, for the workspace:**
+
+8. Clone into your WSL home (for example `~/code/`), not into `/mnt/c`. Git in `/mnt/c` is slow.
+   - The workspace repository: `git clone <remote> ~/code/<workspace>`. If it has no remote, clone it from Windows: `git clone /mnt/c/Users/<you>/<path>/<workspace> ~/code/<workspace>`. Then `git checkout <branch of the records>`.
+   - Each member repository, from its remote, into the workspace folder: `git clone <remote> ~/code/<workspace>/backend`.
+   - In each member clone, set the team branch if it is not the default branch: `git config playbook.integrationBranch dev`.
+9. Copy the files from step 4 that you need, for example `cp /mnt/c/Users/<you>/<path>/backend/.env ~/code/<workspace>/backend/`. Do not commit them.
+10. For each task that continues a branch, make its worktree again: `git -C backend worktree add .claude/worktrees/<task id> <branch>`. Git makes the local branch from `origin/<branch>`.
+11. If the lead will run in the background, make sure that the workspace `.claude/settings.json` has `"worktree": { "baseRef": "head", "bgIsolation": "none" }`, and commit it.
+12. Trust each folder one time: run `claude` in the workspace folder, accept the question, and type `/exit`. Do this again in each member repository. A background session cannot show this question.
+
+**Start the new lead in WSL:**
+
+13. In a terminal in WSL (for example a Windows Terminal tab), run `cd ~/code/<workspace> && claude -n lead`. Give it the message of step 4 above, and add: "The workspace moved from Windows to WSL. The paths in the records are Windows paths. Use the paths in WSL. Each task that continues a branch uses the worktree `<repo>/.claude/worktrees/<task id>`."
+14. Start each member session as the lead tells you, or let the lead start them in the background. A task that continues a branch starts in its worktree from step 10, without `-w`.
+15. Set the Windows power plan so that the computer does not sleep during a long run. WSL sleeps when Windows sleeps.
+16. Keep the Windows folders until each task branch is merged. Then delete them.
+
 Members send their handoffs to the lead, and the lead routes the next step. The sessions talk through Claude Code's [cross-session messages](https://code.claude.com/docs/en/cross-session-messaging.md), which need no setup. Run them all on the same machine; on Windows, all natively or all inside WSL, because the two can't message each other. The roles and rules are in `principles/15-agent-collaboration.md`, "Across repositories".
 
 
