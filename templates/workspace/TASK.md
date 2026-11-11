@@ -13,7 +13,15 @@ Do the steps of the `start-task` skill. Use this brief as the ticket. Make the b
 
 For a scout task, do not do this. Investigate the question below. Do not push, and do not open a PR. If you must change files to try an idea, do it in a temporary worktree, and remove it when you finish. Your handoff is the report: the question, the findings with evidence (file:line, commands and their results), the options, and your recommendation. A recommendation does not give approval for the work.
 
+If the question is about a bug, do steps 1 and 2 of the `fix-bug` skill. In the report, give the trigger, the masking condition, the symptom and the evidence for each.
+
 **Question** (scout task only): <the question that the report must answer>
+
+## The owner's request
+
+<The words of the owner, copied from the ticket or the conversation with no change. Add only the data that is necessary to understand them, for example the content of a report, a decision or a PR that they refer to. Do not make the request wider here. If the owner adds to the request or changes it during the task, add the new words here and send them to the member.>
+
+The acceptance criteria below come from this request. If they do not agree with the request, stop and tell the lead.
 
 ## Acceptance criteria
 

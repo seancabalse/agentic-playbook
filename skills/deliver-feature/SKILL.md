@@ -60,7 +60,7 @@ Start these together, each with the diff (`git diff <base>...HEAD`), the ticket 
 
 ## 6. Fix (at most 2 loops)
 
-Send the **confirmed** findings (and the plausible ones you've checked) to the **product-engineer**, with the reviewers' scenarios and any failing tests they wrote in their worktrees. It fixes them in a fresh worktree from the feature branch. When it returns, re-read the diff, re-run the full checks, then have **qa-verifier** re-check only what changed. After two loops, stop and report what's left instead of looping.
+Decide each finding first (principle 13, "Fix now, or ask the owner"): ask the owner about the ones that would widen the scope. Send the other **confirmed** findings (and the plausible ones you've checked) to the **product-engineer**, with the reviewers' scenarios and any failing tests they wrote in their worktrees. It fixes them in a fresh worktree from the feature branch. When it returns, re-read the diff, re-run the full checks, then have **qa-verifier** re-check only what changed. After two loops, stop and report what's left instead of looping.
 
 ## 7. Docs
 
