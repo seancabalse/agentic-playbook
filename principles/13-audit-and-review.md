@@ -36,3 +36,16 @@ A finding is reported only with a **concrete failure scenario** (these inputs, i
 2. **One ticket per finding**, with severity, scenario, evidence and the suggested fix, linked to the audit doc.
 3. **Fix in priority order.** Accepted risks go to the Decision Log with a revisit trigger.
 4. **Audits are dated documents** in the tracker, so the next audit can compare.
+
+## Fix now, or ask the owner
+
+A finding is evidence, not a mandate. Its label (security, correctness, high severity) never widens the task by itself. The orchestrator or the lead, never the agent that built the change, decides each confirmed finding against the accepted scope: the owner's words, the ticket's acceptance criteria and the plan the owner agreed.
+
+- **Fix it without asking** when the fix restores or completes accepted behaviour: a defect against an acceptance criterion, behaviour that an earlier fix round broke, or a missing part of the agreed design, even when the fix is hard. The small follow-on changes that keep it correct (a test, a doc line, a neighbouring call site) are in scope too.
+- **Ask the owner first** when the fix would:
+  - add a guarantee, subsystem, abstraction, state machine, compatibility surface or ongoing monitoring that the accepted scope doesn't need;
+  - make a product or architecture choice that the scope doesn't settle;
+  - answer another finding on the same theme after a fix round, which suggests the fixes are propping up a weak design rather than closing separate defects;
+  - be destructive or irreversible, or accept a security risk instead of fixing it.
+
+Ask in one message with five parts: the original requirement, what the fix would add, the smallest fix that stays inside the scope, what happens if the owner accepts or declines, and your recommendation with its reason.

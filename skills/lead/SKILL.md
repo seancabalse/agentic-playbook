@@ -120,6 +120,7 @@ Do these steps for each task that can start now.
    - In Markdown files: write `<folder>/<task id>.md`.
 
    Make the brief complete. The member cannot see your conversation, and it cannot read the workspace files. Put in the brief:
+   - The owner's request for this work, in the words of the owner. Do not change it or make it wider. Your acceptance criteria come from it.
    - The epic in one sentence, the story and its acceptance criteria, and the acceptance criteria of the task.
    - The full text of each contract and decision that applies. Do not tell the member to read `DECISIONS.md`.
    - The data from earlier tasks that this task needs (from "Notes for the next task" in the epic file).
@@ -200,12 +201,13 @@ When a handoff comes:
    ```
    Examine the handoff of task <task id>. Do not change the checkout of the member. Do not write files, except in your temporary worktree.
    Repository: <repo>. Branch: <branch>. Base: <base>. Team branch: <team branch>. Other branches in progress in this repository: <branches, or none>.
-   Scope of the task: <from the brief>. Contracts: <the full text>. Checks: <the commands and the results that you expect, from the brief>.
-   1. Read the branch: git -C <repo> log <base>..<branch> and git -C <repo> diff <base>...<branch>. Compare the diff with the scope and the contracts.
+   The owner's request: <the full text from the brief>. Scope of the task: <from the brief>. Contracts: <the full text>. Checks: <the commands and the results that you expect, from the brief>.
+   1. Read the branch: git -C <repo> log <base>..<branch> and git -C <repo> diff <base>...<branch>. Compare the diff with the owner's request, the scope and the contracts.
    2. Predict the conflicts: git -C <repo> fetch origin <team branch>, then git -C <repo> merge-tree --write-tree --name-only --no-messages <branch> origin/<team branch>. Use the local branch. Do the same check against each other branch in progress. Exit code 1 with file names: a conflict. Another result without file names: the check failed.
    3. Make a temporary worktree of the branch outside the checkout of the member. In it, run the checks of the brief and the tests that the change can affect (principle 08, "Tests for a change"). Do not run all the tests. Remove the worktree when you finish.
    Reply with these lines only: 15 lines or fewer, and 300 characters or fewer in each line. If the lead needs more detail about a problem, it asks you.
    Branch: <branch> at <short sha>, <n> commits after <base>
+   Request: met | not met: <how>
    Scope: in scope | outside the scope: <files>
    Contracts: agree | differ: <how>
    Conflicts: none | with <branch>: <files> | check failed: <why>
@@ -224,7 +226,7 @@ When a handoff comes:
    - `STATUS.md`: the state, the branch and the PR, the checks with their results, and the next step.
    - The epic file: the state of the task. Under "Notes for the next task", write the facts that later tasks need. Example: "The endpoint is on branch `KEY-13-save-cart` at abc1234."
 5. **Decide the next step**, and record it with a **Routed** line:
-   - If the task needs fixes, send them to the same session. Do not do this at the third round of fixes. Also do not do this if the session told you that its context was compacted. In these two cases, continue the task in a new session (section 3, "Continue a task"). A long session also becomes worse.
+   - If the task needs fixes, decide each fix first (principle 13, "Fix now, or ask the owner"). A fix that makes the scope larger is an open decision (section 6). Send the other fixes to the same session. Do not do this at the third round of fixes. Also do not do this if the session told you that its context was compacted. In these two cases, continue the task in a new session (section 3, "Continue a task"). A long session also becomes worse.
    - The member can find work that is not in its brief. Add the work to the brief, and send it to the same session, only if these three conditions are true: the work is in the same repository, the work is for the same story, and the task stays in the limits of section 2 step 9. If not, make a new task with the state `planned`. Do not give the work to the session of a different task.
    - If the task is complete, tell the owner how to deliver it. Use the **Delivery** line in `AGENTS.md` section 8:
      - PR (the default): the owner tells the member session to do `ship-pr`. The owner merges the PR with "Squash and merge".

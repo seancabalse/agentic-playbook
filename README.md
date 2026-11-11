@@ -213,7 +213,7 @@ Then:
 A long session sends its whole conversation again with each message, so it uses more tokens as it grows. A session for one task starts with only the rules and that task's brief, and closes when the task is done. Nothing is lost, because the context is in files, not in the sessions:
 
 - the epic file (`docs/workspace/epics/<epic>.md`): the stories and tasks, their order, the contracts and the notes later tasks need;
-- each task's brief: the epic in one sentence, its story and the story's acceptance criteria, the task's acceptance criteria, the full contracts and what earlier tasks delivered;
+- each task's brief: the owner's request in the owner's words, the epic in one sentence, its story and the story's acceptance criteria, the task's acceptance criteria, the full contracts and what earlier tasks delivered;
 - `STATUS.md`, `HANDOFFS.md` and `DECISIONS.md`.
 
 ### Keeping the lead's context small
